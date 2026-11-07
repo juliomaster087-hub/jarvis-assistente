@@ -46,7 +46,7 @@ O endereço do Worker é salvo apenas no armazenamento local desse navegador. Pa
 - O backend valida método, rota, tamanho do corpo, quantidade e tamanho das mensagens.
 - **CORS não é autenticação e não impede chamadas diretas por scripts.** Antes de divulgar amplamente o serviço, configure uma regra de rate limiting no Cloudflare (por exemplo, limitar requisições por IP em /api/chat) e monitore o consumo/quota do Gemini. Não compartilhe publicamente o endereço do Worker como se fosse uma chave secreta.
 - O nível gratuito do Gemini tem limites e condições; pode haver indisponibilidade ou cobrança se você mudar para um nível pago. Confira os painéis oficiais antes de usar em produção.
-- A conversa fica salva no armazenamento local do navegador; não existe conta nem sincronização entre dispositivos nesta primeira versão.
+- O histórico e as memórias são persistidos no D1 por conta e podem ser recuperados em outro dispositivo após o login. As tarefas ainda ficam no armazenamento local do navegador.
 
 ## 5. Testar
 
