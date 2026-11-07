@@ -5,7 +5,7 @@
 const MODEL = "gemini-3.5-flash-lite";
 const MAX_MESSAGES = 10;
 const MAX_MESSAGE_CHARS = 4000;
-const SESSION_TTL = 60 * 60 * 24 * 7;
+const SESSION_TTL = 60 * 60 * 12;
 const PBKDF2_ITERATIONS = 310000;
 
 function corsHeaders(origin, allowedOrigin) {
@@ -40,6 +40,15 @@ async function verifyPassword(password, stored) {
   return computed.hash === stored;
 }
 function cleanUser(row) { return { id: row.id, name: row.display_name, email: row.email }; }
+async function rateLimit(db, request, scope, identity = "") {
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const key = await sha256(scope + "|" + ip + "|" + identity);
+  const now = Math.floor(Date.now() / 1000);
+  const windowStart = now - 900;
+  const row = await db.prepare("INSERT INTO rate_limits (bucket_key,window_start,count) VALUES (?,?,1) ON CONFLICT(bucket_key) DO UPDATE SET count=CASE WHEN rate_limits.window_start<? THEN 1 ELSE rate_limits.count+1 END, window_start=CASE WHEN rate_limits.window_start<? THEN excluded.window_start ELSE rate_limits.window_start END RETURNING count")
+    .bind(key, now, windowStart, windowStart).first();
+  return Number(row?.count || 0) <= 8;
+}
 async function createSession(db, userId) {
   const token = randomHex(32);
   const now = Math.floor(Date.now() / 1000);
@@ -85,7 +94,7 @@ export default {
       const name = typeof body.name === "string" ? body.name.trim() : "";
       const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
       const password = typeof body.password === "string" ? body.password : "";
-      if (name.length < 2 || name.length > 60) return json({ error: "O nome deve ter entre 2 e 60 caracteres." }, 400, cors);
+      if (!(await rateLimit(env.DB, request, "register", email))) return json({ error: "Muitas tentativas. Aguarde 15 minutos e tente novamente." }, 429, cors);\n      if (name.length < 2 || name.length > 60) return json({ error: "O nome deve ter entre 2 e 60 caracteres." }, 400, cors);
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return json({ error: "Informe um e-mail válido." }, 400, cors);
       if (password.length < 10 || password.length > 128) return json({ error: "A senha deve ter entre 10 e 128 caracteres." }, 400, cors);
       const existing = await env.DB.prepare("SELECT id FROM users WHERE email=?").bind(email).first();
@@ -102,7 +111,7 @@ export default {
     if (url.pathname === "/api/login") {
       const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
       const password = typeof body.password === "string" ? body.password : "";
-      if (!email || !password || email.length > 254 || password.length > 128) return json({ error: "E-mail ou senha inválidos." }, 400, cors);
+      if (!(await rateLimit(env.DB, request, "login", email))) return json({ error: "Muitas tentativas. Aguarde 15 minutos e tente novamente." }, 429, cors);\n      if (!email || !password || email.length > 254 || password.length > 128) return json({ error: "E-mail ou senha inválidos." }, 400, cors);
       const row = await env.DB.prepare("SELECT id,email,display_name,password_hash FROM users WHERE email=?").bind(email).first();
       if (!row || !(await verifyPassword(password, row.password_hash))) return json({ error: "E-mail ou senha inválidos." }, 401, cors);
       const token = await createSession(env.DB, row.id);
