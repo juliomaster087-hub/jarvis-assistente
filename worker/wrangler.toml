@@ -1,3 +1,9 @@
 name = "jarvis-assistente-api"
 main = "index.js"
 compatibility_date = "2026-11-07"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "jarvis-users"
+database_id = "c6d39859-c1d5-4cf8-b15f-44642c2c5443"
+migrations_dir = "migrations"
