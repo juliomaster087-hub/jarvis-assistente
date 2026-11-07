@@ -147,7 +147,7 @@
       finally { button.disabled = false; button.textContent = authMode === 'register' ? 'Criar minha conta' : 'Entrar'; }
     });
     $('#logoutButton').addEventListener('click', async () => {
-      try { await fetch(getApiUrl() + '/api/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + authToken } }); } catch {}
+      try { await fetch(getApiUrl() + '/api/logout', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken }, body: '{}' }); } catch {}
       sessionStorage.removeItem('jarvis-session-token'); authToken = ''; setAuthUI(null);
     });
     async function restoreSession() {
