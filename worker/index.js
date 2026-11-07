@@ -2,7 +2,7 @@
  * Jarvis API — Cloudflare Worker
  * Gemini API key is stored as a Cloudflare Secret (GEMINI_API_KEY).
  */
-const MODEL = "gemini-3.6-flash";
+const MODEL = "gemini-3.5-flash-lite";
 const MAX_MESSAGES = 10;
 const MAX_MESSAGE_CHARS = 4000;
 
