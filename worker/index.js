@@ -33,7 +33,12 @@ async function passwordHash(password, salt = randomHex(16)) {
   const hash = btoa(String.fromCharCode(...new Uint8Array(bits)));
   return { salt, hash: "pbkdf2$" + PBKDF2_ITERATIONS + "$" + salt + "$" + hash };
 }
-function constantTimeEqual(a, b) {\n  if (a.length !== b.length) return false;\n  let diff = 0;\n  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);\n  return diff === 0;\n}\nasync function verifyPassword(password, stored) {
+function constantTimeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}\nasync function verifyPassword(password, stored) {
   const parts = String(stored).split("$");
   if (parts.length !== 4 || parts[0] !== "pbkdf2" || Number(parts[1]) !== PBKDF2_ITERATIONS) return false;
   const computed = await passwordHash(password, parts[2]);
