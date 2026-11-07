@@ -33,21 +33,21 @@ async function passwordHash(password, salt = randomHex(16)) {
   const hash = btoa(String.fromCharCode(...new Uint8Array(bits)));
   return { salt, hash: "pbkdf2$" + PBKDF2_ITERATIONS + "$" + salt + "$" + hash };
 }
-async function verifyPassword(password, stored) {
+function constantTimeEqual(a, b) {\n  if (a.length !== b.length) return false;\n  let diff = 0;\n  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);\n  return diff === 0;\n}\nasync function verifyPassword(password, stored) {
   const parts = String(stored).split("$");
   if (parts.length !== 4 || parts[0] !== "pbkdf2" || Number(parts[1]) !== PBKDF2_ITERATIONS) return false;
   const computed = await passwordHash(password, parts[2]);
-  return computed.hash === stored;
+  return constantTimeEqual(computed.hash, stored);
 }
 function cleanUser(row) { return { id: row.id, name: row.display_name, email: row.email }; }
-async function rateLimit(db, request, scope, identity = "") {
+async function rateLimit(db, request, scope, identity = "", max = 8) {
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
   const key = await sha256(scope + "|" + ip + "|" + identity);
   const now = Math.floor(Date.now() / 1000);
   const windowStart = now - 900;
   const row = await db.prepare("INSERT INTO rate_limits (bucket_key,window_start,count) VALUES (?,?,1) ON CONFLICT(bucket_key) DO UPDATE SET count=CASE WHEN rate_limits.window_start<? THEN 1 ELSE rate_limits.count+1 END, window_start=CASE WHEN rate_limits.window_start<? THEN excluded.window_start ELSE rate_limits.window_start END RETURNING count")
     .bind(key, now, windowStart, windowStart).first();
-  return Number(row?.count || 0) <= 8;
+  return Number(row?.count || 0) <= max;
 }
 async function createSession(db, userId) {
   const token = randomHex(32);
