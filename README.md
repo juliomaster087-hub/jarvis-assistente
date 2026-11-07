@@ -59,3 +59,29 @@ O endereço do Worker é salvo apenas no armazenamento local desse navegador. Pa
 ## GitHub Pages
 
 O frontend continua publicado pela branch main, pasta /(root). O backend não roda no GitHub Pages; ele é hospedado separadamente no Cloudflare Workers.
+
+
+## Contas individuais (MVP multiusuário)
+
+A versão atual adiciona cadastro e login por e-mail/senha, sessões revogáveis e dados de perfil isolados por usuário.
+
+- **Banco:** Cloudflare D1 `jarvis-users`.
+- **Autenticação:** senhas derivadas com PBKDF2-HMAC-SHA256 (310.000 iterações); tokens de sessão aleatórios de 256 bits. O banco armazena apenas SHA-256 do token, nunca o token bruto.
+- **Sessões:** validade de 12 horas; o token fica em `sessionStorage` no navegador e é enviado no cabeçalho Authorization. Fechar a aba encerra o armazenamento local do token.
+- **Abuso:** limite básico por IP/identidade em cadastro e login e limite por usuário/IP no chat, usando janelas de 15 minutos.
+- **Privacidade:** cada chamada ao chat exige sessão válida; tarefas e histórico local são separados por ID de usuário no navegador. Conversas e tarefas ainda não são sincronizadas entre dispositivos nem armazenadas como histórico no servidor.
+- **CORS:** somente a origem exata do GitHub Pages é permitida. CORS não substitui autenticação; todas as rotas privadas validam o token no Worker.
+- **E-mail:** ainda não há verificação de endereço nem recuperação de senha.
+- **Produção pública:** antes de divulgar amplamente, recomenda-se domínio próprio para API/site, verificação de e-mail, recuperação de senha, monitoramento/alertas de abuso e política de privacidade/termos. O token em sessionStorage é vulnerável a roubo em caso de XSS; manter o frontend livre de scripts não confiáveis e planejar autenticação por cookie HttpOnly em uma arquitetura same-site.
+
+### Smoke test
+
+Com Node.js 20+, execute:
+
+```bash
+JARVIS_API_URL=https://jarvis-assistente-api.likasousa2024.workers.dev node worker/test-api.mjs
+```
+
+O teste cria um usuário sintético com e-mail `jarvis-smoke-...`; remova esse registro de teste do D1 após a execução, se desejar.
+
+O schema versionado está em `worker/migrations/0001_auth.sql`. A instância D1 de produção já foi criada e migrada para esta versão.
