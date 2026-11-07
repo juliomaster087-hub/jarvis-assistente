@@ -11,7 +11,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
     :root{color-scheme:dark;--bg:#080d18;--surface:#101a2b;--surface2:#142239;--line:rgba(178,204,231,.13);--text:#f3f7fc;--muted:#9aabc2;--mint:#72e4d0;--blue:#83aaff;--radius:22px;--shadow:0 24px 80px rgba(0,0,0,.28)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}.container{width:min(1120px,calc(100% - 40px));margin:auto}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}button,input{font:inherit}.quick-config{border:1px solid var(--line);border-radius:999px;background:#142239;color:var(--mint);padding:7px 11px;font-size:.75rem;font-weight:700}.send-btn:disabled{opacity:.6;cursor:wait}button{cursor:pointer}.container{width:min(1120px,calc(100% - 40px));margin:auto}
     .bg-glow{position:absolute;z-index:-1;pointer-events:none;width:600px;height:600px;border-radius:50%;filter:blur(110px);opacity:.14}.glow-a{top:-300px;left:8%;background:#3bd8c0}.glow-b{top:430px;right:-360px;background:#557ef5}
     .topbar{position:sticky;top:0;z-index:20;background:rgba(8,13,24,.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.25rem;letter-spacing:-.04em}.brand-mark{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#a1ffed,#43b9ac);color:#09201e;box-shadow:0 0 28px #53ddc344}.brand-mark svg{width:21px}.nav-links{display:flex;align-items:center;gap:30px;color:var(--muted);font-size:.92rem}.nav-links a:hover{color:var(--text)}.nav-cta,.primary-btn{border:0;border-radius:999px;background:var(--mint);color:#08201d;font-weight:700;padding:12px 19px;transition:.2s}.nav-cta:hover,.primary-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px #4bd8c333}.menu-toggle{display:none;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:8px 11px}
     .hero{padding:94px 0 88px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:64px;min-height:620px}.pill{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border:1px solid #72e4d044;border-radius:999px;color:var(--mint);font-size:.8rem;font-weight:700;letter-spacing:.04em}.pulse{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 5px #72e4d01a}.hero h1{font:600 clamp(3rem,6vw,5.25rem)/1.04 'Space Grotesk',sans-serif;letter-spacing:-.065em;margin:24px 0 20px}.hero h1 span{background:linear-gradient(100deg,var(--mint),#a7c4ff);background-clip:text;-webkit-background-clip:text;color:transparent}.hero-copy{font-size:1.12rem;color:var(--muted);max-width:500px}.hero-actions{display:flex;align-items:center;gap:22px;margin-top:32px}.text-link{color:#d7e3f2;font-weight:600}.text-link span{color:var(--mint);margin-left:5px}.microcopy{margin-top:18px;color:#71839d;font-size:.82rem}
@@ -61,9 +61,9 @@
     </section>
     <section class="demo-section" id="demonstracao">
       <div class="container demo-grid">
-        <div class="demo-intro"><div class="kicker">Experimente</div><h2>Converse com a demonstração.</h2><p>Escreva uma mensagem ou escolha uma sugestão. O Jarvis responde com exemplos prontos para mostrar como a interface funciona.</p><div class="demo-note">Esta é uma demonstração local. Ainda não está conectada a um serviço de inteligência artificial.</div></div>
+        <div class="demo-intro"><div class="kicker">Experimente</div><h2>Converse com inteligência artificial de verdade.</h2><p>Escreva uma mensagem ou escolha uma sugestão. O Jarvis enviará sua conversa para uma IA real através de um servidor seguro.</p><div class="demo-note">Configure o endereço do servidor Jarvis para ativar a IA. Sua chave secreta fica no servidor, nunca neste site.</div></div>
         <div class="demo-app">
-          <div class="app-bar"><div class="app-title"><span class="brand-mark" style="width:27px;height:27px;border-radius:9px">✦</span> Jarvis Assistente</div><span class="app-status">● Demonstração</span></div>
+          <div class="app-bar"><div class="app-title"><span class="brand-mark" style="width:27px;height:27px;border-radius:9px">✦</span> Jarvis Assistente</div><button type="button" id="apiConfigButton" class="quick-config">⚙ Configurar conexão</button></div>
           <div class="chat-area" id="chatArea" aria-live="polite"><div class="chat-bubble bot">Olá! 👋 Eu sou o Jarvis. Posso mostrar algumas ideias para organizar seu dia. O que você gostaria de fazer?</div></div>
           <div class="quick-prompts"><button type="button" data-prompt="Me ajude a organizar meu dia">Organizar meu dia</button><button type="button" data-prompt="Me dê uma ideia para começar">Preciso de uma ideia</button><button type="button" data-prompt="Como posso ser mais produtivo?">Ser mais produtivo</button></div>
           <form class="chat-form" id="chatForm"><input id="chatInput" type="text" maxlength="240" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off" required><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form>
@@ -87,18 +87,75 @@
     navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { navLinks.classList.remove('open'); menuToggle.setAttribute('aria-expanded','false'); menuToggle.textContent='☰'; }));
 
     const chatArea = $('#chatArea');
+    const API_STORAGE_KEY = 'jarvis-assistente-api-url-v1';
+    const HISTORY_KEY = 'jarvis-assistente-chat-history-v1';
+    let conversation = [];
+    try { conversation = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); if (!Array.isArray(conversation)) conversation = []; } catch { conversation = []; }
+    function getApiUrl() { return (localStorage.getItem(API_STORAGE_KEY) || '').trim().replace(/\\/$/, ''); }
     function addBubble(text, kind) { const bubble=document.createElement('div'); bubble.className='chat-bubble '+kind; bubble.textContent=text; chatArea.appendChild(bubble); chatArea.scrollTop=chatArea.scrollHeight; }
-    function answerFor(message) {
-      const m=message.toLowerCase();
-      if(/dia|rotina|organ/.test(m)) return 'Uma forma simples de começar: escolha 3 prioridades, resolva primeiro a mais importante e reserve alguns minutos para pausas. Você pode registrar cada passo na lista logo abaixo. ✨';
-      if(/ideia|cri|começar|projeto/.test(m)) return 'Que tal começar pequeno? Anote o resultado que deseja alcançar, divida em uma primeira ação de 15 minutos e faça essa ação hoje. Toda grande ideia começa com um primeiro passo.';
-      if(/produt|tempo|foco/.test(m)) return 'Experimente trabalhar em blocos de 25 minutos, deixar as notificações de lado e fazer uma pausa curta. No fim, anote o que avançou e escolha a próxima prioridade.';
-      if(/obrigad/.test(m)) return 'Por nada! Estou aqui nesta demonstração para ajudar você a explorar as possibilidades. 💚';
-      return 'Boa pergunta! Nesta versão de demonstração, posso compartilhar ideias sobre organização, criatividade e produtividade. Experimente uma das sugestões acima — ou conecte uma IA real ao projeto em uma próxima etapa.';
+    function renderHistory() {
+      chatArea.replaceChildren();
+      if (!conversation.length) addBubble('Olá! 👋 Eu sou o Jarvis, agora preparado para conversar com uma IA real. Configure a conexão para começarmos.', 'bot');
+      conversation.forEach(item => addBubble(item.content, item.role === 'user' ? 'user' : 'bot'));
     }
-    function sendMessage(message) { const clean=message.trim(); if(!clean)return; addBubble(clean,'user'); $('#chatInput').value=''; window.setTimeout(()=>addBubble(answerFor(clean),'bot'),250); }
-    $('#chatForm').addEventListener('submit', e=>{e.preventDefault();sendMessage($('#chatInput').value);});
-    document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>sendMessage(button.dataset.prompt)));
+    function configureApi() {
+      const current = getApiUrl();
+      const entered = window.prompt('Cole o endereço completo do seu Worker Cloudflare (ex.: https://jarvis-api.seunome.workers.dev). Não cole sua chave Gemini aqui.', current);
+      if (entered === null) return;
+      const value = entered.trim().replace(/\\/$/, '');
+      if (value && !/^https:\\/\\/[a-z0-9.-]+(?::\\d+)?$/i.test(value)) {
+        window.alert('Endereço inválido. Use apenas o endereço HTTPS do seu Worker, sem caminho adicional.');
+        return;
+      }
+      if (value) localStorage.setItem(API_STORAGE_KEY, value);
+      else localStorage.removeItem(API_STORAGE_KEY);
+      window.alert(value ? 'Endereço salvo neste navegador. Você já pode conversar com o Jarvis.' : 'Conexão removida.');
+    }
+    $('#apiConfigButton').addEventListener('click', configureApi);
+    async function sendMessage(message) {
+      const clean = message.trim();
+      if (!clean) return;
+      const apiBase = getApiUrl();
+      if (!apiBase) {
+        addBubble(clean, 'user');
+        addBubble('Antes de conversar, configure o endereço do servidor no botão “Configurar conexão”. Siga o README para publicar o servidor e obter esse endereço.', 'bot');
+        return;
+      }
+      addBubble(clean, 'user');
+      $('#chatInput').value = '';
+      const sendButton = $('.send-btn');
+      sendButton.disabled = true;
+      sendButton.textContent = '...';
+      const pending = document.createElement('div');
+      pending.className = 'chat-bubble bot';
+      pending.textContent = 'Pensando…';
+      chatArea.appendChild(pending);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      try {
+        const history = [...conversation, { role: 'user', content: clean }].slice(-10);
+        const response = await fetch(apiBase + '/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Não foi possível obter uma resposta (' + response.status + ').');
+        if (typeof data.reply !== 'string' || !data.reply.trim()) throw new Error('O servidor retornou uma resposta vazia.');
+        conversation = [...history, { role: 'model', content: data.reply }].slice(-10);
+        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(conversation)); } catch {}
+        pending.remove();
+        addBubble(data.reply, 'bot');
+      } catch (error) {
+        pending.remove();
+        addBubble('Não consegui conectar: ' + (error.message || 'erro desconhecido') + ' Confira se o Worker está publicado e se a chave Gemini foi configurada como Secret.', 'bot');
+      } finally {
+        sendButton.disabled = false;
+        sendButton.textContent = 'Enviar';
+      }
+    }
+    $('#chatForm').addEventListener('submit', e => { e.preventDefault(); sendMessage($('#chatInput').value); });
+    document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => sendMessage(button.dataset.prompt)));
+    renderHistory();
 
     const STORAGE_KEY='jarvis-assistente-tasks-v1';
     let tasks=[];
