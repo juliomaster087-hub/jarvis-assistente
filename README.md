@@ -52,7 +52,7 @@ O endereço do Worker é salvo apenas no armazenamento local desse navegador. Pa
 
 - Health check: abra https://SEU-WORKER.workers.dev/health.
 - Chat: envie uma mensagem pelo site.
-- Erros 429: limite/quota do provedor; aguarde e confira o AI Studio.
+- Erros 429: confira os limites e o uso no painel da OpenAI.
 - Erro de origem: confirme que ALLOWED_ORIGIN é exatamente https://juliomaster087-hub.github.io sem barra final.
 - Erro de chave: confirme que OPENAI_API_KEY foi cadastrada como Secret e que o Worker foi publicado novamente.
 
