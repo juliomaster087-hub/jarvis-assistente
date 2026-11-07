@@ -69,8 +69,10 @@ A versão atual adiciona cadastro e login por e-mail/senha, sessões revogáveis
 - **Autenticação:** senhas derivadas com PBKDF2-HMAC-SHA256 (310.000 iterações); tokens de sessão aleatórios de 256 bits. O banco armazena apenas SHA-256 do token, nunca o token bruto.
 - **Sessões:** validade de 12 horas; o token fica em `sessionStorage` no navegador e é enviado no cabeçalho Authorization. Fechar a aba encerra o armazenamento local do token.
 - **Abuso:** limite básico por IP/identidade em cadastro e login e limite por usuário/IP no chat, usando janelas de 15 minutos.
-- **Privacidade:** cada chamada ao chat exige sessão válida; tarefas e histórico local são separados por ID de usuário no navegador. Conversas e tarefas ainda não são sincronizadas entre dispositivos nem armazenadas como histórico no servidor.
+- **Privacidade:** cada chamada privada exige sessão válida. O histórico do chat e as memórias ficam no D1 e são filtrados pelo ID autenticado do usuário; contas diferentes não compartilham esses dados. As tarefas continuam locais neste MVP.
 - **CORS:** somente a origem exata do GitHub Pages é permitida. CORS não substitui autenticação; todas as rotas privadas validam o token no Worker.
+- **Memória:** o Jarvis usa as últimas 8 mensagens persistidas como contexto e injeta as memórias salvas na instrução do modelo. O usuário pode salvar/excluir memórias no painel; no chat, a frase “Jarvis, lembre que ...” também salva explicitamente o conteúdo.
+- **Histórico:** até 100 mensagens recentes são recuperadas ao entrar na conta, inclusive em outro dispositivo.
 - **E-mail:** ainda não há verificação de endereço nem recuperação de senha.
 - **Produção pública:** antes de divulgar amplamente, recomenda-se domínio próprio para API/site, verificação de e-mail, recuperação de senha, monitoramento/alertas de abuso e política de privacidade/termos. O token em sessionStorage é vulnerável a roubo em caso de XSS; manter o frontend livre de scripts não confiáveis e planejar autenticação por cookie HttpOnly em uma arquitetura same-site.
 
@@ -84,4 +86,4 @@ JARVIS_API_URL=https://jarvis-assistente-api.likasousa2024.workers.dev node work
 
 O teste cria um usuário sintético com e-mail `jarvis-smoke-...`; remova esse registro de teste do D1 após a execução, se desejar.
 
-O schema versionado está em `worker/migrations/0001_auth.sql`. A instância D1 de produção já foi criada e migrada para esta versão.
+O schema versionado está em `worker/migrations/0001_auth.sql` e `worker/migrations/0002_memory.sql`. A migração 0002 foi aplicada à instância D1 de produção `jarvis-users`. O Worker `jarvis-assistente-api` foi atualizado para persistir histórico e memórias, preservando os bindings `DB`, `ALLOWED_ORIGIN` e o Secret `GEMINI_API_KEY`.
