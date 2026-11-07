@@ -219,7 +219,6 @@ export default {
           .join("\\n")
           .trim();
 
-        const reply = parts.map(part => part.text || "").join("").trim();
         if (!reply) return json({ error: "A IA não retornou texto. Tente novamente." }, 502, cors);
         if (user) {
           const now = new Date().toISOString();
