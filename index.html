@@ -65,7 +65,7 @@
       <div class="container demo-grid">
         <div class="demo-intro"><div class="kicker">Experimente</div><h2>Converse com inteligência artificial de verdade.</h2><p>Escreva uma mensagem ou escolha uma sugestão. O Jarvis enviará sua conversa para uma IA real através de um servidor seguro.</p><div class="demo-note">Configure o endereço do servidor Jarvis para ativar a IA. Sua chave secreta fica no servidor, nunca neste site.</div></div>
         <div class="demo-app">
-          <div class="app-bar"><div class="app-title"><span class="brand-mark" style="width:27px;height:27px;border-radius:9px">✦</span> Jarvis Assistente</div><button type="button" id="apiConfigButton" class="quick-config">⚙ Configurar conexão</button></div>
+          <div class="app-bar"><div class="app-title"><span class="brand-mark" style="width:27px;height:27px;border-radius:9px">✦</span> Jarvis Assistente</div><button type="button" id="apiConfigButton" class="quick-config">↻ Testar servidor</button></div>
 <div class="auth-panel" id="authPanel"><h3>Crie seu espaço no Jarvis</h3><p>Cadastre-se ou entre para ter conversas privadas vinculadas à sua conta.</p>
 <form id="authForm"><div class="auth-fields"><input id="authName" type="text" maxlength="60" placeholder="Seu nome" autocomplete="name" class="auth-hidden"><input id="authEmail" type="email" maxlength="254" placeholder="E-mail" autocomplete="email" required><input id="authPassword" type="password" minlength="10" maxlength="128" placeholder="Senha (mínimo 10 caracteres)" autocomplete="current-password" required></div>
 <div class="auth-actions"><button id="authSubmit" type="submit">Entrar</button><button class="secondary" id="authToggle" type="button">Criar conta</button></div><div class="auth-message" id="authMessage" role="status" aria-live="polite">A senha deve ter pelo menos 10 caracteres.</div></form></div>
@@ -177,7 +177,11 @@
         authToken = data.token;
         sessionStorage.setItem('jarvis-session-token', authToken);
         setAuthUI(data.user);
-      } catch (error) { setAuthMessage(error.message || 'Falha de conexão.'); }
+      } catch (error) {
+        setAuthMessage(error instanceof TypeError
+          ? 'Não foi possível alcançar o servidor do Jarvis. Toque em “Testar servidor”.'
+          : (error.message || 'Falha de conexão.'));
+      }
       finally { button.disabled = false; button.textContent = authMode === 'register' ? 'Criar minha conta' : 'Entrar'; }
     });
     $('#logoutButton').addEventListener('click', async () => {
@@ -194,34 +198,38 @@
       } catch { sessionStorage.removeItem('jarvis-session-token'); authToken = ''; setAuthUI(null); }
     }
 
-    const API_STORAGE_KEY = 'jarvis-assistente-api-url-v1';
+    const API_BASE_URL = 'https://jarvis-assistente-api.likasousa2024.workers.dev';
     let HISTORY_KEY = 'jarvis-assistente-chat-history-v1';
     let conversation = [];
-    try { conversation = []; } catch { conversation = []; }
-    function getApiUrl() { let value = (localStorage.getItem(API_STORAGE_KEY) || 'https://jarvis-assistente-api.likasousa2024.workers.dev').trim(); while (value.endsWith('/')) value = value.slice(0, -1); return value; }
+    function getApiUrl() { return API_BASE_URL; }
     function addBubble(text, kind) { const bubble=document.createElement('div'); bubble.className='chat-bubble '+kind; bubble.textContent=text; chatArea.appendChild(bubble); chatArea.scrollTop=chatArea.scrollHeight; }
     function renderHistory() {
       chatArea.replaceChildren();
       if (!conversation.length) addBubble('Olá! 👋 Eu sou o Jarvis, agora preparado para conversar com uma IA real. Configure a conexão para começarmos.', 'bot');
       conversation.forEach(item => addBubble(item.content, item.role === 'user' ? 'user' : 'bot'));
     }
-    function configureApi() {
-      const current = getApiUrl();
-      const entered = window.prompt('Cole o endereço completo do seu Worker Cloudflare (ex.: https://jarvis-api.seunome.workers.dev). Não cole sua chave Gemini aqui.', current);
-      if (entered === null) return;
-      let value = entered.trim();
-      while (value.endsWith('/')) value = value.slice(0, -1);
-      let validUrl = false;
-      try { const parsed = new URL(value); validUrl = parsed.protocol === 'https:' && parsed.pathname === '/' && !parsed.search && !parsed.hash; } catch {}
-      if (value && !validUrl) {
-        window.alert('Endereço inválido. Use apenas o endereço HTTPS do seu Worker, sem caminho adicional.');
-        return;
+    async function testApiConnection() {
+      const button = $('#apiConfigButton');
+      const previous = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Testando…';
+      try {
+        const response = await fetch(getApiUrl() + '/health', { method: 'GET', cache: 'no-store' });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.ok !== true) throw new Error('Servidor respondeu com status ' + response.status + '.');
+        setAuthMessage('Servidor conectado. A API do Jarvis está respondendo.');
+        button.textContent = '✓ Conectado';
+      } catch (error) {
+        setAuthMessage(error instanceof TypeError
+          ? 'O navegador não conseguiu alcançar a API. Verifique a conexão e as permissões CORS.'
+          : error.message);
+        button.textContent = 'Falha na conexão';
+      } finally {
+        button.disabled = false;
+        if (button.textContent === 'Testando…') button.textContent = previous;
       }
-      if (value) localStorage.setItem(API_STORAGE_KEY, value);
-      else localStorage.removeItem(API_STORAGE_KEY);
-      window.alert(value ? 'Endereço salvo neste navegador. Você já pode conversar com o Jarvis.' : 'Conexão removida.');
     }
-    $('#apiConfigButton').addEventListener('click', configureApi);
+    $('#apiConfigButton').addEventListener('click', testApiConnection);
     async function sendMessage(message) {
       const clean = message.trim();
       if (!clean) return;
