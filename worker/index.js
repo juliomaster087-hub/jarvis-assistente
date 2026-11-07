@@ -104,6 +104,18 @@ export default {
       if (!user) return json({ error: "Sessão inválida ou expirada. Entre novamente." }, 401, cors);
       return json({ user: { id: user.id, name: user.name, email: user.email } }, 200, cors);
     }
+    if (request.method === "GET" && url.pathname === "/api/history") {
+      const user = await getUser(request, env);
+      if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
+      const result = await env.DB.prepare("SELECT id,role,content,created_at FROM chat_messages WHERE user_id=? ORDER BY id DESC LIMIT 100").bind(user.id).all();
+      return json({ messages: (result.results || []).reverse() }, 200, cors);
+    }
+    if (request.method === "GET" && url.pathname === "/api/memories") {
+      const user = await getUser(request, env);
+      if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
+      const result = await getMemories(env.DB, user.id);
+      return json({ memories: result.results || [] }, 200, cors);
+    }
     if (request.method !== "POST") return json({ error: "Método não permitido." }, 405, cors);
     let body;
     try { body = await readBody(request); }
@@ -144,18 +156,6 @@ export default {
       return json({ ok: true }, 200, cors);
     }
 
-    if (url.pathname === "/api/history" && request.method === "GET") {
-      const user = await getUser(request, env);
-      if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
-      const result = await env.DB.prepare("SELECT id,role,content,created_at FROM chat_messages WHERE user_id=? ORDER BY id DESC LIMIT 100").bind(user.id).all();
-      return json({ messages: (result.results || []).reverse() }, 200, cors);
-    }
-    if (url.pathname === "/api/memories" && request.method === "GET") {
-      const user = await getUser(request, env);
-      if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
-      const result = await getMemories(env.DB, user.id);
-      return json({ memories: result.results || [] }, 200, cors);
-    }
     if (url.pathname === "/api/memories" && request.method === "POST") {
       const user = await getUser(request, env);
       if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
