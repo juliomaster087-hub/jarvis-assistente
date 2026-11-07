@@ -188,7 +188,9 @@ export default {
         contents = body.messages.slice(-12).filter(item => item && ["user","model"].includes(item.role) && typeof item.content === "string" && item.content.length <= MAX_MESSAGE_CHARS).map(item => ({ role:item.role, parts:[{text:item.content}] }));
       }
       if (!contents.length || contents[contents.length - 1]?.parts?.[0]?.text !== message) contents.push({ role: "user", parts: [{ text: message }] });
-      const memories = user ? ((await getMemories(env.DB, user.id)).results || []).map(item => "- " + item.content).join("\n") : "";
+      const storedMemories = user ? ((await getMemories(env.DB, user.id)).results || []).map(item => item.content) : [];
+      const browserMemories = Array.isArray(body.memories) ? body.memories.filter(item => typeof item === "string" && item.trim().length > 0 && item.length <= 300) : [];
+      const memories = [...new Set([...storedMemories, ...browserMemories].map(item => String(item).trim()))].slice(0, 30).map(item => "- " + item).join("\n");
       const systemText = "Você é Jarvis, assistente pessoal prestativo, claro e cordial. Responda em português brasileiro por padrão. Seja honesto sobre suas capacidades e não afirme executar ações externas sem fazê-lo.\n\nMEMÓRIAS CONFIRMADAS DO USUÁRIO (use apenas quando relevante; não invente):\n" + (memories || "Nenhuma memória salva ainda.") + "\n\nSe o usuário disser 'lembre que ...', confirme que a informação foi guardada. Se pedir para esquecer uma memória, explique que ela pode ser removida na área Memórias.";
       try {
         const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent?key=" + encodeURIComponent(env.GEMINI_API_KEY);
