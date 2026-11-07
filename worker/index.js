@@ -71,6 +71,11 @@ export default {
     if (request.method === "GET" && url.pathname === "/health") return json({ ok: true, service: "Jarvis API", auth: "enabled" }, 200, cors);
     if (!allowedOrigin || origin !== allowedOrigin) return json({ error: "Origem não autorizada." }, 403, cors);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+    if (request.method === "GET" && url.pathname === "/api/me") {
+      const user = await getUser(request, env);
+      if (!user) return json({ error: "Sessão inválida ou expirada. Entre novamente." }, 401, cors);
+      return json({ user: { id: user.id, name: user.name, email: user.email } }, 200, cors);
+    }
     if (request.method !== "POST") return json({ error: "Método não permitido." }, 405, cors);
     let body;
     try { body = await readBody(request); }
@@ -102,11 +107,6 @@ export default {
       if (!row || !(await verifyPassword(password, row.password_hash))) return json({ error: "E-mail ou senha inválidos." }, 401, cors);
       const token = await createSession(env.DB, row.id);
       return json({ token, user: cleanUser(row), expiresIn: SESSION_TTL }, 200, cors);
-    }
-    if (url.pathname === "/api/me") {
-      const user = await getUser(request, env);
-      if (!user) return json({ error: "Sessão inválida ou expirada. Entre novamente." }, 401, cors);
-      return json({ user: { id: user.id, name: user.name, email: user.email } }, 200, cors);
     }
     if (url.pathname === "/api/logout") {
       const user = await getUser(request, env);
