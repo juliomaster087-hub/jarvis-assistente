@@ -38,7 +38,8 @@ function constantTimeEqual(a, b) {
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
-}\nasync function verifyPassword(password, stored) {
+}
+async function verifyPassword(password, stored) {
   const parts = String(stored).split("$");
   if (parts.length !== 4 || parts[0] !== "pbkdf2" || Number(parts[1]) !== PBKDF2_ITERATIONS) return false;
   const computed = await passwordHash(password, parts[2]);
