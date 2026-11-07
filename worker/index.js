@@ -25,10 +25,10 @@ export default {
     const origin = request.headers.get("Origin") || "";
     const allowedOrigin = env.ALLOWED_ORIGIN || "";
     const cors = corsHeaders(origin, allowedOrigin);
+    const url = new URL(request.url);
+    if (request.method === "GET" && url.pathname === "/health") return json({ ok: true, service: "Jarvis API" }, 200, { "Content-Type": "application/json; charset=utf-8" });
     if (!allowedOrigin || origin !== allowedOrigin) return json({ error: "Origem não autorizada." }, 403, cors);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-    const url = new URL(request.url);
-    if (request.method === "GET" && url.pathname === "/health") return json({ ok: true, service: "Jarvis API" }, 200, cors);
     if (request.method !== "POST" || url.pathname !== "/api/chat") return json({ error: "Rota não encontrada." }, 404, cors);
     if (!env.GEMINI_API_KEY) return json({ error: "O administrador ainda não configurou a chave da IA no servidor." }, 503, cors);
 
