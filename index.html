@@ -75,7 +75,7 @@
             <ul class="memory-list" id="memoryList"></ul>
             <div class="memory-empty" id="memoryEmpty">Nenhuma memória salva. Você também pode escrever “Jarvis, lembre que...” no chat.</div>
           </div>
-          <form class="chat-form" id="chatForm"><input id="chatInput" type="text" maxlength="240" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off" required><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form>
+          <form class="chat-form" id="chatForm"><input id="chatInput" type="text" maxlength="4000" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off" required><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form>
         </div>
       </div>
     </section>
@@ -174,7 +174,7 @@
       input.value = '';
       input.focus();
     });
-    $('#apiStatus').textContent = '● Gemini conectado';
+    $('#apiStatus').textContent = '● Pronto para conversar';
     async function sendMessage(message) {
       const clean = message.trim();
       if (!clean) return;
@@ -195,7 +195,11 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: clean,
-            messages: [...conversation.slice(-14), { role: 'user', content: clean }],
+            messages: [
+              ...(memories.length ? [{ role: 'user', content: 'CONTEXTO DE MEMÓRIA SALVO PELO USUÁRIO (use somente se for relevante; não trate como uma nova pergunta):\\n' + memories.slice(0, 15).join('\\n').slice(0, 2500) }] : []),
+              ...conversation.slice(-10),
+              { role: 'user', content: clean }
+            ].slice(-12),
             memories: memories.slice(0, 30)
           })
         });
