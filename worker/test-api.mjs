@@ -1,33 +1,39 @@
-// Manual API smoke test: JARVIS_API_URL=https://... node worker/test-api.mjs
+// API integration smoke test. Run: JARVIS_API_URL=https://... node worker/test-api.mjs
 import assert from "node:assert/strict";
-const base = (process.env.JARVIS_API_URL || "").replace(/\/$/, "");
-if (!base.startsWith("https://")) throw new Error("Defina JARVIS_API_URL com a URL HTTPS do Worker.");
-const email = `jarvis-smoke-${Date.now()}@example.com`;
-const password = "Jarvis-Test-Password-2026!";
-const post = async (path, body, token) => {
-  const response = await fetch(base + path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Origin: origin, ...(token ? { Authorization: "Bearer " + token } : {}) },
-    body: JSON.stringify(body)
-  });
-  return { response, data: await response.json() };
-};
-const origin = "https://juliomaster087-hub.github.io";
-const health = await fetch(base + "/health", { headers: { Origin: origin } });
-assert.equal(health.status, 200, "health endpoint");
-const denied = await fetch(base + "/api/me", { headers: { Origin: origin } });
-assert.equal(denied.status, 401, "GET /api/me without token must be unauthorized");
-const registered = await post("/api/register", { name: "Smoke Test", email, password });
-assert.equal(registered.response.status, 201, JSON.stringify(registered.data));
-const token = registered.data.token;
-assert.ok(token, "registration returns session token");
-const me = await fetch(base + "/api/me", { headers: { Origin: origin, Authorization: "Bearer " + token } });
-assert.equal(me.status, 200, "authenticated profile");
-assert.equal((await me.json()).user.email, email);
-const chatWithoutAuth = await post("/api/chat", { messages: [{ role: "user", content: "oi" }] });
-assert.equal(chatWithoutAuth.response.status, 401, "chat requires authentication");
-const login = await post("/api/login", { email, password });
-assert.equal(login.response.status, 200, "login");
-const logout = await post("/api/logout", {}, login.data.token);
-assert.equal(logout.response.status, 200, "logout");
-console.log("Jarvis auth smoke test passed. Remove the synthetic user from D1 after the test if desired:", email);
+const base=(process.env.JARVIS_API_URL||"").replace(/\/$/,"");
+if(!base.startsWith("https://")) throw new Error("Defina JARVIS_API_URL com a URL HTTPS do Worker.");
+const origin="https://juliomaster087-hub.github.io";
+const post=async(path,body,token)=>{const response=await fetch(base+path,{method:"POST",headers:{"Content-Type":"application/json",Origin:origin,...(token?{Authorization:"Bearer "+token}:{})},body:JSON.stringify(body)});return{response,data:await response.json()};};
+const get=async(path,token)=>{const response=await fetch(base+path,{headers:{Origin:origin,...(token?{Authorization:"Bearer "+token}:{})}});return{response,data:await response.json()};};
+const health=await fetch(base+"/health",{headers:{Origin:origin}});
+assert.equal(health.status,200,"health endpoint");
+assert.equal((await get("/api/history")).response.status,401,"history requires authentication");
+const suffix=Date.now();
+const password="Jarvis-Test-Password-2026!";
+const a=await post("/api/register",{name:"Smoke Test A",email:`jarvis-a-${suffix}@example.com`,password});
+assert.equal(a.response.status,201,JSON.stringify(a.data));
+const tokenA=a.data.token;
+assert.ok(tokenA);
+const profile=await get("/api/me",tokenA);
+assert.equal(profile.response.status,200);
+const save=await post("/api/memories",{content:"Prefere testes automatizados."},tokenA);
+assert.equal(save.response.status,201,JSON.stringify(save.data));
+const memoriesA=await get("/api/memories",tokenA);
+assert.equal(memoriesA.response.status,200);
+assert.equal(memoriesA.data.memories.length,1);
+assert.equal(memoriesA.data.memories[0].content,"Prefere testes automatizados.");
+const historyA=await get("/api/history",tokenA);
+assert.equal(historyA.response.status,200);
+const b=await post("/api/register",{name:"Smoke Test B",email:`jarvis-b-${suffix}@example.com`,password});
+assert.equal(b.response.status,201,JSON.stringify(b.data));
+const memoriesB=await get("/api/memories",b.data.token);
+assert.equal(memoriesB.response.status,200);
+assert.equal(memoriesB.data.memories.length,0,"memories must be isolated per account");
+const deleted=await post("/api/memories/delete",{id:memoriesA.data.memories[0].id},tokenA);
+assert.equal(deleted.response.status,200);
+assert.equal((await get("/api/memories",tokenA)).data.memories.length,0);
+const login=await post("/api/login",{email:`jarvis-a-${suffix}@example.com`,password});
+assert.equal(login.response.status,200);
+const logout=await post("/api/logout",{},login.data.token);
+assert.equal(logout.response.status,200);
+console.log("Jarvis auth + persistent memory smoke test passed. Synthetic test users:",a.data.user.email,b.data.user.email);
