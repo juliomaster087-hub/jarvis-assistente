@@ -63,7 +63,7 @@
     </section>
     <section class="demo-section" id="demonstracao">
       <div class="container demo-grid">
-        <div class="demo-intro"><div class="kicker">Experimente</div><h2>Converse com inteligência artificial de verdade.</h2><p>Escreva uma mensagem ou escolha uma sugestão. O Jarvis enviará sua conversa para uma IA real através de um servidor seguro.</p><div class="demo-note">Configure o endereço do servidor Jarvis para ativar a IA. Sua chave secreta fica no servidor, nunca neste site.</div></div>
+        <div class="demo-intro"><div class="kicker">Experimente</div><h2>Converse com inteligência artificial de verdade.</h2><p>Escreva uma mensagem ou escolha uma sugestão. O Jarvis enviará sua conversa para uma IA real através de um servidor seguro.</p><div class="demo-note">A conexão com o servidor é configurada automaticamente. Use “Testar servidor” para verificar a disponibilidade da API.</div></div>
         <div class="demo-app">
           <div class="app-bar"><div class="app-title"><span class="brand-mark" style="width:27px;height:27px;border-radius:9px">✦</span> Jarvis Assistente</div><button type="button" id="apiConfigButton" class="quick-config">↻ Testar servidor</button></div>
 <div class="auth-panel" id="authPanel"><h3>Crie seu espaço no Jarvis</h3><p>Cadastre-se ou entre para ter conversas privadas vinculadas à sua conta.</p>
@@ -205,7 +205,7 @@
     function addBubble(text, kind) { const bubble=document.createElement('div'); bubble.className='chat-bubble '+kind; bubble.textContent=text; chatArea.appendChild(bubble); chatArea.scrollTop=chatArea.scrollHeight; }
     function renderHistory() {
       chatArea.replaceChildren();
-      if (!conversation.length) addBubble('Olá! 👋 Eu sou o Jarvis, agora preparado para conversar com uma IA real. Configure a conexão para começarmos.', 'bot');
+      if (!conversation.length) addBubble('Olá! 👋 Eu sou o Jarvis, agora preparado para conversar com uma IA real. A conexão está pronta para começarmos.', 'bot');
       conversation.forEach(item => addBubble(item.content, item.role === 'user' ? 'user' : 'bot'));
     }
     async function testApiConnection() {
@@ -236,7 +236,7 @@
       const apiBase = getApiUrl();
       if (!apiBase) {
         addBubble(clean, 'user');
-        addBubble('Antes de conversar, configure o endereço do servidor no botão “Configurar conexão”. Siga o README para publicar o servidor e obter esse endereço.', 'bot');
+        addBubble('O servidor do Jarvis não está configurado. Toque em “Testar servidor” para verificar a conexão.', 'bot');
         return;
       }
       addBubble(clean, 'user');
