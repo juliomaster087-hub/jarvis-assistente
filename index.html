@@ -144,7 +144,7 @@
         sessionStorage.setItem('jarvis-session-token', authToken);
         setAuthUI(data.user);
       } catch (error) { setAuthMessage(error.message || 'Falha de conexão.'); }
-      finally { button.disabled = false; setAuthMode(authMode); }
+      finally { button.disabled = false; button.textContent = authMode === 'register' ? 'Criar minha conta' : 'Entrar'; }
     });
     $('#logoutButton').addEventListener('click', async () => {
       try { await fetch(getApiUrl() + '/api/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + authToken } }); } catch {}
