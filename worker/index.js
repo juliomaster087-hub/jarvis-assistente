@@ -72,6 +72,19 @@ async function getUser(request, env) {
     .bind(hash, now).first();
   return row ? { ...cleanUser(row), tokenHash: hash } : null;
 }
+
+async function getMemories(db, userId) {
+  return await db.prepare("SELECT id,content,created_at FROM user_memories WHERE user_id=? ORDER BY created_at DESC LIMIT 50").bind(userId).all();
+}
+async function saveMemory(db, userId, content) {
+  const clean = String(content || "").trim().slice(0, 500);
+  if (!clean) return null;
+  const id = crypto.randomUUID();
+  await db.prepare("INSERT OR IGNORE INTO user_memories (id,user_id,content,created_at) VALUES (?,?,?,?)")
+    .bind(id, userId, clean, new Date().toISOString()).run();
+  return await db.prepare("SELECT id,content,created_at FROM user_memories WHERE user_id=? AND content=?").bind(userId, clean).first();
+}
+
 async function readBody(request, max = 30000) {
   const raw = await request.text();
   if (raw.length > max) throw new Error("PAYLOAD_TOO_LARGE");
@@ -130,23 +143,54 @@ export default {
       if (user) await env.DB.prepare("DELETE FROM sessions WHERE token_hash=?").bind(user.tokenHash).run();
       return json({ ok: true }, 200, cors);
     }
+
+    if (url.pathname === "/api/history" && request.method === "GET") {
+      const user = await getUser(request, env);
+      if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
+      const result = await env.DB.prepare("SELECT id,role,content,created_at FROM chat_messages WHERE user_id=? ORDER BY id DESC LIMIT 100").bind(user.id).all();
+      return json({ messages: (result.results || []).reverse() }, 200, cors);
+    }
+    if (url.pathname === "/api/memories" && request.method === "GET") {
+      const user = await getUser(request, env);
+      if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
+      const result = await getMemories(env.DB, user.id);
+      return json({ memories: result.results || [] }, 200, cors);
+    }
+    if (url.pathname === "/api/memories" && request.method === "POST") {
+      const user = await getUser(request, env);
+      if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
+      const content = typeof body.content === "string" ? body.content.trim() : "";
+      if (!content || content.length > 500) return json({ error: "A memória deve ter entre 1 e 500 caracteres." }, 400, cors);
+      const memory = await saveMemory(env.DB, user.id, content);
+      return json({ memory }, 201, cors);
+    }
+    if (url.pathname === "/api/memories/delete" && request.method === "POST") {
+      const user = await getUser(request, env);
+      if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
+      const id = typeof body.id === "string" ? body.id : "";
+      await env.DB.prepare("DELETE FROM user_memories WHERE id=? AND user_id=?").bind(id, user.id).run();
+      return json({ ok: true }, 200, cors);
+    }
+
     if (url.pathname === "/api/chat") {
       const user = await getUser(request, env);
       if (!user) return json({ error: "Entre na sua conta para conversar com o Jarvis." }, 401, cors);
       if (!env.GEMINI_API_KEY) return json({ error: "O administrador ainda não configurou a chave da IA." }, 503, cors);
-      if (!Array.isArray(body.messages) || body.messages.length < 1 || body.messages.length > MAX_MESSAGES) return json({ error: "Envie entre 1 e 10 mensagens." }, 400, cors);
-      const contents = [];
-      for (const item of body.messages) {
-        if (!item || !["user", "model"].includes(item.role) || typeof item.content !== "string") return json({ error: "Formato de conversa inválido." }, 400, cors);
-        const content = item.content.trim();
-        if (!content || content.length > MAX_MESSAGE_CHARS) return json({ error: "Cada mensagem deve ter entre 1 e 4.000 caracteres." }, 400, cors);
-        contents.push({ role: item.role, parts: [{ text: content }] });
-      }
-      if (contents[contents.length - 1].role !== "user") return json({ error: "A última mensagem precisa ser do usuário." }, 400, cors);
+      const message = typeof body.message === "string" ? body.message.trim() : (Array.isArray(body.messages) ? String(body.messages[body.messages.length - 1]?.content || "").trim() : "");
+      if (!message || message.length > MAX_MESSAGE_CHARS) return json({ error: "A mensagem deve ter entre 1 e 4.000 caracteres." }, 400, cors);
+      if (!(await rateLimit(env.DB, request, "chat", user.id, 40))) return json({ error: "Muitas mensagens. Aguarde alguns minutos." }, 429, cors);
+      const rememberMatch = message.match(/^(?:jarvis[, ]*)?(?:lembre(?:-se)?(?: de)? que|remember that)[: ]+(.+)$/i);
+      if (rememberMatch) await saveMemory(env.DB, user.id, rememberMatch[1]);
+      const historyResult = await env.DB.prepare("SELECT role,content FROM chat_messages WHERE user_id=? ORDER BY id DESC LIMIT 8").bind(user.id).all();
+      const contents = (historyResult.results || []).reverse().map(item => ({ role: item.role, parts: [{ text: item.content }] }));
+      contents.push({ role: "user", parts: [{ text: message }] });
+      const memoriesResult = await getMemories(env.DB, user.id);
+      const memories = (memoriesResult.results || []).map(item => "- " + item.content).join("\n");
+      const systemText = "Você é Jarvis, assistente pessoal prestativo, claro e cordial. Responda em português brasileiro por padrão. Seja honesto sobre suas capacidades e não afirme executar ações externas sem fazê-lo.\n\nMEMÓRIAS CONFIRMADAS DO USUÁRIO (use apenas quando relevante; não invente):\n" + (memories || "Nenhuma memória salva ainda.") + "\n\nSe o usuário disser 'lembre que ...', confirme que a informação foi guardada. Se pedir para esquecer uma memória, explique que ela pode ser removida na área Memórias.";
       try {
         const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent?key=" + encodeURIComponent(env.GEMINI_API_KEY);
         const upstream = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
-          systemInstruction: { parts: [{ text: "Você é Jarvis, assistente pessoal prestativo, claro e cordial. Responda em português brasileiro por padrão. Seja honesto sobre suas capacidades e não afirme executar ações externas sem fazê-lo." }] },
+          systemInstruction: { parts: [{ text: systemText }] },
           contents, generationConfig: { maxOutputTokens: 800 }
         }) });
         const result = await upstream.json().catch(() => ({}));
@@ -154,7 +198,12 @@ export default {
         const parts = result?.candidates?.[0]?.content?.parts || [];
         const reply = parts.map(part => part.text || "").join("").trim();
         if (!reply) return json({ error: "A IA não retornou texto. Tente novamente." }, 502, cors);
-        return json({ reply }, 200, cors);
+        const now = new Date().toISOString();
+        await env.DB.batch([
+          env.DB.prepare("INSERT INTO chat_messages (user_id,role,content,created_at) VALUES (?,?,?,?)").bind(user.id, "user", message, now),
+          env.DB.prepare("INSERT INTO chat_messages (user_id,role,content,created_at) VALUES (?,?,?,?)").bind(user.id, "model", reply, now)
+        ]);
+        return json({ reply, remembered: !!rememberMatch }, 200, cors);
       } catch { return json({ error: "Falha ao conectar ao provedor de IA." }, 502, cors); }
     }
     return json({ error: "Rota não encontrada." }, 404, cors);
