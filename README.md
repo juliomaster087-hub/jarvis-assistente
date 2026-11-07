@@ -6,7 +6,7 @@ Site estático no GitHub Pages + API privada em Cloudflare Workers + Google Gemi
 
 - **Frontend:** GitHub Pages (index.html).
 - **Backend:** Cloudflare Worker em worker/index.js.
-- **IA:** Google Gemini API (modelo gemini-3.5-flash-lite).
+- **IA:** Google Gemini API (modelo gemini-2.5-flash-lite).
 - **Segredos:** a chave GEMINI_API_KEY fica no Cloudflare como Secret. Nunca coloque essa chave no HTML, JavaScript público ou GitHub.
 
 ## 1. Criar uma chave Gemini
