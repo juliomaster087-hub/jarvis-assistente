@@ -144,7 +144,7 @@
       conversation.forEach(item => addBubble(item.content, item.role === 'user' ? 'user' : 'bot'));
     }
     try {
-      const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || localStorage.getItem('jarvis-assistente-chat-history-v2') || '[]');
       if (Array.isArray(saved)) conversation = saved.filter(item => item && ['user', 'model'].includes(item.role) && typeof item.content === 'string').slice(-60);
       const savedMemories = JSON.parse(localStorage.getItem(MEMORY_KEY) || '[]');
       if (Array.isArray(savedMemories)) memories = [...new Set(savedMemories.filter(item => typeof item === 'string' && item.trim()).map(item => item.trim().slice(0, 300)))].slice(0, 30);
