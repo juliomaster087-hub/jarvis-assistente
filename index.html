@@ -105,11 +105,13 @@
       $('#chatArea').classList.toggle('auth-hidden', !user);
       document.querySelector('.quick-prompts').classList.toggle('auth-hidden', !user);
       document.querySelector('.chat-form').classList.toggle('auth-hidden', !user);
+      document.querySelector('#tarefas').classList.toggle('auth-hidden', !user);
       if (user) {
         $('#accountLabel').textContent = 'Olá, ' + user.name + ' · ' + user.email;
         HISTORY_KEY = 'jarvis-chat-' + user.id;
         try { conversation = JSON.parse(sessionStorage.getItem(HISTORY_KEY) || '[]'); if (!Array.isArray(conversation)) conversation = []; } catch { conversation = []; }
         renderHistory();
+        loadTasksForUser(user.id);
       } else {
         conversation = [];
         addBubble('Entre ou crie uma conta para iniciar uma conversa privada com o Jarvis.', 'bot');
@@ -232,11 +234,11 @@
     renderHistory();
     restoreSession();
 
-    const STORAGE_KEY='jarvis-assistente-tasks-v1';
+    let STORAGE_KEY='jarvis-assistente-tasks-v1';
     let tasks=[];
-    try { tasks=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); if(!Array.isArray(tasks))tasks=[]; } catch { tasks=[]; }
     const taskList=$('#taskList');
-    function saveTasks(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks));}catch{}}
+    function loadTasksForUser(userId){STORAGE_KEY='jarvis-tasks-'+userId;try{tasks=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(tasks))tasks=[];}catch{tasks=[];}renderTasks();}
+    function saveTasks(){if(!currentUser)return;try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks));}catch{}}
     function renderTasks(){
       taskList.replaceChildren();
       $('#emptyState').hidden=tasks.length>0;
