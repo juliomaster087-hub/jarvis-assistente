@@ -15,7 +15,7 @@ const post = async (path, body, token) => {
 const health = await fetch(base + "/health");
 assert.equal(health.status, 200, "health endpoint");
 const denied = await fetch(base + "/api/me");
-assert.equal(denied.status, 405, "GET /api/me without token should not disclose profile");
+assert.equal(denied.status, 401, "GET /api/me without token must be unauthorized");
 const registered = await post("/api/register", { name: "Smoke Test", email, password });
 assert.equal(registered.response.status, 201, JSON.stringify(registered.data));
 const token = registered.data.token;
