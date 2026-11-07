@@ -70,13 +70,13 @@
 <form id="authForm"><div class="auth-fields"><input id="authName" type="text" maxlength="60" placeholder="Seu nome" autocomplete="name" class="auth-hidden"><input id="authEmail" type="email" maxlength="254" placeholder="E-mail" autocomplete="email" required><input id="authPassword" type="password" minlength="10" maxlength="128" placeholder="Senha (mínimo 10 caracteres)" autocomplete="current-password" required></div>
 <div class="auth-actions"><button id="authSubmit" type="submit">Entrar</button><button class="secondary" id="authToggle" type="button">Criar conta</button></div><div class="auth-message" id="authMessage" role="status" aria-live="polite">A senha deve ter pelo menos 10 caracteres.</div></form></div>
 <div class="account-bar auth-hidden" id="accountBar"><span id="accountLabel">Conectado</span><button id="logoutButton" type="button">Sair</button></div>
-          <div class="chat-area" id="chatArea" aria-live="polite"><div class="chat-bubble bot">Olá! 👋 Eu sou o Jarvis. Posso mostrar algumas ideias para organizar seu dia. O que você gostaria de fazer?</div></div>
-          <div class="quick-prompts"><button type="button" data-prompt="Me ajude a organizar meu dia">Organizar meu dia</button><button type="button" data-prompt="Me dê uma ideia para começar">Preciso de uma ideia</button><button type="button" data-prompt="Como posso ser mais produtivo?">Ser mais produtivo</button></div>
-          <form class="chat-form" id="chatForm"><input id="chatInput" type="text" maxlength="240" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off" required><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form>
+          <div class="chat-area auth-hidden" id="chatArea" aria-live="polite"><div class="chat-bubble bot">Olá! 👋 Eu sou o Jarvis. Posso mostrar algumas ideias para organizar seu dia. O que você gostaria de fazer?</div></div>
+          <div class="quick-prompts auth-hidden"><button type="button" data-prompt="Me ajude a organizar meu dia">Organizar meu dia</button><button type="button" data-prompt="Me dê uma ideia para começar">Preciso de uma ideia</button><button type="button" data-prompt="Como posso ser mais produtivo?">Ser mais produtivo</button></div>
+          <form class="chat-form auth-hidden" id="chatForm"><input id="chatInput" type="text" maxlength="240" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off" required><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form>
         </div>
       </div>
     </section>
-    <section id="tarefas">
+    <section id="tarefas" class="auth-hidden">
       <div class="container tasks-wrap">
         <div class="tasks-copy"><div class="kicker">Seu próximo passo</div><h2>Um plano de cada vez.</h2><p>Experimente a lista de tarefas do Jarvis. Você pode adicionar atividades, marcar as concluídas e apagar o que não precisa mais. Seus itens ficam guardados neste navegador.</p></div>
         <div class="task-card"><div class="task-card-head"><strong>Minha lista</strong><span class="task-count" id="taskCount">0 tarefas</span></div><form class="task-form" id="taskForm"><input id="taskInput" type="text" maxlength="100" placeholder="Ex.: planejar a semana..." aria-label="Nova tarefa" required><button type="submit" aria-label="Adicionar tarefa">+</button></form><ul class="task-list" id="taskList"></ul><div class="empty-state" id="emptyState">Sua lista está livre. Adicione a primeira tarefa ✨</div></div>
@@ -164,7 +164,7 @@
     let HISTORY_KEY = 'jarvis-assistente-chat-history-v1';
     let conversation = [];
     try { conversation = []; } catch { conversation = []; }
-    function getApiUrl() { let value = (localStorage.getItem(API_STORAGE_KEY) || '').trim(); while (value.endsWith('/')) value = value.slice(0, -1); return value; }
+    function getApiUrl() { let value = (localStorage.getItem(API_STORAGE_KEY) || 'https://jarvis-assistente-api.likasousa2024.workers.dev').trim(); while (value.endsWith('/')) value = value.slice(0, -1); return value; }
     function addBubble(text, kind) { const bubble=document.createElement('div'); bubble.className='chat-bubble '+kind; bubble.textContent=text; chatArea.appendChild(bubble); chatArea.scrollTop=chatArea.scrollHeight; }
     function renderHistory() {
       chatArea.replaceChildren();
