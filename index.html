@@ -91,7 +91,7 @@
     const HISTORY_KEY = 'jarvis-assistente-chat-history-v1';
     let conversation = [];
     try { conversation = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); if (!Array.isArray(conversation)) conversation = []; } catch { conversation = []; }
-    function getApiUrl() { return (localStorage.getItem(API_STORAGE_KEY) || '').trim().replace(/\\/$/, ''); }
+    function getApiUrl() { let value = (localStorage.getItem(API_STORAGE_KEY) || '').trim(); while (value.endsWith('/')) value = value.slice(0, -1); return value; }
     function addBubble(text, kind) { const bubble=document.createElement('div'); bubble.className='chat-bubble '+kind; bubble.textContent=text; chatArea.appendChild(bubble); chatArea.scrollTop=chatArea.scrollHeight; }
     function renderHistory() {
       chatArea.replaceChildren();
@@ -102,8 +102,11 @@
       const current = getApiUrl();
       const entered = window.prompt('Cole o endereço completo do seu Worker Cloudflare (ex.: https://jarvis-api.seunome.workers.dev). Não cole sua chave Gemini aqui.', current);
       if (entered === null) return;
-      const value = entered.trim().replace(/\\/$/, '');
-      if (value && !/^https:\\/\\/[a-z0-9.-]+(?::\\d+)?$/i.test(value)) {
+      let value = entered.trim();
+      while (value.endsWith('/')) value = value.slice(0, -1);
+      let validUrl = false;
+      try { const parsed = new URL(value); validUrl = parsed.protocol === 'https:' && parsed.pathname === '/' && !parsed.search && !parsed.hash; } catch {}
+      if (value && !validUrl) {
         window.alert('Endereço inválido. Use apenas o endereço HTTPS do seu Worker, sem caminho adicional.');
         return;
       }
