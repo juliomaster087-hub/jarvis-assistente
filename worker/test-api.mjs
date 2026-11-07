@@ -7,20 +7,21 @@ const password = "Jarvis-Test-Password-2026!";
 const post = async (path, body, token) => {
   const response = await fetch(base + path, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) },
+    headers: { "Content-Type": "application/json", Origin: origin, ...(token ? { Authorization: "Bearer " + token } : {}) },
     body: JSON.stringify(body)
   });
   return { response, data: await response.json() };
 };
-const health = await fetch(base + "/health");
+const origin = "https://juliomaster087-hub.github.io";
+const health = await fetch(base + "/health", { headers: { Origin: origin } });
 assert.equal(health.status, 200, "health endpoint");
-const denied = await fetch(base + "/api/me");
+const denied = await fetch(base + "/api/me", { headers: { Origin: origin } });
 assert.equal(denied.status, 401, "GET /api/me without token must be unauthorized");
 const registered = await post("/api/register", { name: "Smoke Test", email, password });
 assert.equal(registered.response.status, 201, JSON.stringify(registered.data));
 const token = registered.data.token;
 assert.ok(token, "registration returns session token");
-const me = await fetch(base + "/api/me", { headers: { Authorization: "Bearer " + token } });
+const me = await fetch(base + "/api/me", { headers: { Origin: origin, Authorization: "Bearer " + token } });
 assert.equal(me.status, 200, "authenticated profile");
 assert.equal((await me.json()).user.email, email);
 const chatWithoutAuth = await post("/api/chat", { messages: [{ role: "user", content: "oi" }] });
