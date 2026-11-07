@@ -148,7 +148,6 @@
         saveHistory();
         pending.remove();
         addBubble(data.reply, 'bot');
-        if (data.remembered) loadServerData();
       } catch (error) {
         pending.remove();
         addBubble('Não consegui conectar ao Jarvis: ' + (error.message || 'erro desconhecido') + '. Tente novamente em instantes.', 'bot');
@@ -165,7 +164,7 @@
     let tasks=[];
     const taskList=$('#taskList');
     function loadTasksForUser(userId){STORAGE_KEY='jarvis-tasks-'+userId;try{tasks=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');if(!Array.isArray(tasks))tasks=[];}catch{tasks=[];}renderTasks();}
-    function saveTasks(){if(!currentUser)return;try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks));}catch{}}
+    function saveTasks(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks));}catch{}}
     function renderTasks(){
       taskList.replaceChildren();
       $('#emptyState').hidden=tasks.length>0;
