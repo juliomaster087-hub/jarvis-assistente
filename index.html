@@ -25,6 +25,36 @@
     @media(max-width:850px){.hero{grid-template-columns:1fr;gap:28px;padding-top:70px;text-align:center}.hero-copy{margin:auto}.hero-actions{justify-content:center}.hero-visual{min-height:420px}.features{grid-template-columns:1fr 1fr}.demo-grid,.tasks-wrap{grid-template-columns:1fr}.demo-intro,.tasks-copy{text-align:center;max-width:600px;margin:auto}.nav-links{gap:17px}}
     @media(max-width:600px){.container{width:min(100% - 30px,1120px)}.nav{height:66px}.menu-toggle{display:block}.nav-links{display:none;position:absolute;top:66px;left:0;right:0;padding:18px 22px 22px;background:#0b1424;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch}.nav-links.open{display:flex}.nav-cta{display:none}.hero{padding:58px 0 48px}.hero h1{font-size:clamp(2.7rem,13vw,4rem)}.hero-actions{flex-direction:column;gap:16px}.hero-visual{min-height:355px}.orb{width:175px;height:175px}.orb:before{width:245px;height:245px}.orb:after{width:300px;height:300px}.orb svg{width:65px}.visual-card{margin-top:18px;padding:16px}.features{grid-template-columns:1fr}.feature{min-height:0}section{padding:64px 0}.section-head{margin-bottom:30px}.chat-area{min-height:170px}.closing-card{padding:42px 20px}.footer-inner{justify-content:center;text-align:center}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+    .view-tab{padding:9px 15px;border-radius:999px;border:1px solid transparent;transition:.2s}
+    .view-tab.active{color:var(--mint);background:#72e4d012;border-color:#72e4d044}
+    .chat-bubble{white-space:pre-wrap;overflow-wrap:anywhere}
+    .chat-bubble strong{color:#fff;font-weight:800}
+    body.chat-mode{height:100dvh;overflow:hidden}
+    body.chat-mode main>.hero,body.chat-mode main>#recursos,body.chat-mode main>#tarefas,body.chat-mode main>.closing,body.chat-mode footer{display:none!important}
+    body.chat-mode #demonstracao{display:block;padding:12px 0 14px;height:calc(100dvh - 76px);overflow:hidden;background:transparent}
+    body.chat-mode #demonstracao>.container{width:min(1500px,calc(100% - 32px));height:100%}
+    body.chat-mode .demo-grid{display:block;height:100%}
+    body.chat-mode .demo-intro{display:none}
+    body.chat-mode .demo-app{height:100%;display:flex;flex-direction:column;border-radius:20px}
+    body.chat-mode .chat-area{flex:1;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;padding:22px clamp(16px,4vw,48px)}
+    body.chat-mode .chat-bubble{max-width:min(82%,850px);font-size:.98rem;line-height:1.75}
+    body.chat-mode .chat-images,body.chat-mode .research-sources{margin-left:0}
+    body.chat-mode .quick-prompts{padding:10px 20px;flex-shrink:0}
+    body.chat-mode .memory-panel{max-height:145px;overflow:auto;flex-shrink:0}
+    body.chat-mode .chat-form{flex-shrink:0;padding:14px 18px}
+    body.chat-mode .chat-form input{padding:14px 16px}
+    body.chat-mode .send-btn{min-width:100px}
+    @media(max-width:600px){
+      .view-tab{padding:8px 12px}
+      body.chat-mode #demonstracao{height:calc(100dvh - 66px);padding:7px 0}
+      body.chat-mode #demonstracao>.container{width:calc(100% - 14px)}
+      body.chat-mode .demo-app{border-radius:15px}
+      body.chat-mode .chat-bubble{max-width:94%;font-size:.92rem}
+      body.chat-mode .memory-panel{max-height:118px;padding:10px 12px}
+      body.chat-mode .quick-prompts{padding:8px 10px}
+      body.chat-mode .chat-form{padding:10px}
+      body.chat-mode .send-btn{min-width:72px;padding:0 12px}
+    }
     .chat-images{align-self:flex-start;width:min(88%,620px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:-5px}
     .chat-image-card{min-width:0;margin:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#0d192b}
     .chat-image-card img{display:block;width:100%;height:150px;object-fit:cover;background:#101a2b}
@@ -39,8 +69,8 @@
   <header class="topbar">
     <div class="container nav">
       <a class="brand" href="#inicio" aria-label="Jarvis, início"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.8 14.7 9.3 21.2 12l-6.5 2.7L12 21.2l-2.7-6.5L2.8 12l6.5-2.7L12 2.8Z"/></svg></span>jarvis<span style="color:var(--mint)">.</span></a>
-      <nav class="nav-links" id="navLinks" aria-label="Navegação principal"><a href="#recursos">Recursos</a><a href="#demonstracao">Demonstração</a><a href="#tarefas">Minhas tarefas</a></nav>
-      <a class="nav-cta" href="#demonstracao">Experimentar agora ↗</a>
+      <nav class="nav-links" id="navLinks" aria-label="Navegação principal"><a class="view-tab active" data-view="presentation" href="#inicio">Apresentação</a><a class="view-tab" data-view="chat" href="#demonstracao">Chat</a></nav>
+      <a class="nav-cta" href="#demonstracao">Abrir Jarvis ↗</a>
       <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">☰</button>
     </div>
   </header>
@@ -99,6 +129,18 @@
     const $ = (selector, root=document) => root.querySelector(selector);
     $('#year').textContent = new Date().getFullYear();
     const menuToggle = $('#menuToggle'), navLinks = $('#navLinks');
+    function setView() {
+      const isChat = location.hash === '#demonstracao' || location.hash === '#chat';
+      document.body.classList.toggle('chat-mode', isChat);
+      document.querySelectorAll('.view-tab').forEach(tab => {
+        const active = (tab.dataset.view === 'chat') === isChat;
+        tab.classList.toggle('active', active);
+        if (active) tab.setAttribute('aria-current', 'page');
+        else tab.removeAttribute('aria-current');
+      });
+    }
+    window.addEventListener('hashchange', setView);
+    setView();
     menuToggle.addEventListener('click', () => { const open = navLinks.classList.toggle('open'); menuToggle.setAttribute('aria-expanded', String(open)); menuToggle.textContent = open ? '✕' : '☰'; });
     navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { navLinks.classList.remove('open'); menuToggle.setAttribute('aria-expanded','false'); menuToggle.textContent='☰'; }));
 
@@ -110,10 +152,45 @@
     let conversation = [];
     let memories = [];
     function getApiUrl() { return API_BASE_URL; }
-    function addBubble(text, kind, sources=[], images=[]) {
+    function renderFormattedText(element, text) {
+      element.replaceChildren();
+      const parts = String(text || '').split(/(\\*\\*[^*]+\\*\\*)/g);
+      parts.forEach(part => {
+        if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+          const strong = document.createElement('strong');
+          strong.textContent = part.slice(2, -2);
+          element.appendChild(strong);
+        } else {
+          element.appendChild(document.createTextNode(part));
+        }
+      });
+    }
+    async function typeFormattedText(element, text) {
+      element.replaceChildren();
+      const parts = String(text || '').split(/(\\*\\*[^*]+\\*\\*)/g);
+      const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      for (const part of parts) {
+        const isBold = part.startsWith('**') && part.endsWith('**') && part.length > 4;
+        const content = isBold ? part.slice(2, -2) : part;
+        const node = document.createTextNode('');
+        if (isBold) {
+          const strong = document.createElement('strong');
+          strong.appendChild(node);
+          element.appendChild(strong);
+        } else {
+          element.appendChild(node);
+        }
+        for (const character of content) {
+          node.appendData(character);
+          chatArea.scrollTop = chatArea.scrollHeight;
+          if (!reducedMotion) await new Promise(resolve => setTimeout(resolve, 7));
+        }
+      }
+    }
+    function addBubble(text, kind, sources=[], images=[], animate=false) {
       const bubble = document.createElement('div');
       bubble.className = 'chat-bubble ' + kind;
-      bubble.textContent = text;
+      if (!animate) renderFormattedText(bubble, text);
       chatArea.appendChild(bubble);
       if (kind === 'bot' && Array.isArray(images) && images.length) {
         const gallery = document.createElement('div');
@@ -179,6 +256,7 @@
         if (list.children.length) { sourceBox.appendChild(list); chatArea.appendChild(sourceBox); }
       }
       chatArea.scrollTop = chatArea.scrollHeight;
+      return bubble;
     }
     function saveHistory() {
       try { localStorage.setItem(HISTORY_KEY, JSON.stringify(conversation.slice(-60))); } catch {}
@@ -279,7 +357,8 @@
         conversation = [...conversation, { role: 'user', content: clean }, { role: 'model', content: data.reply }].slice(-60);
         saveHistory();
         pending.remove();
-        addBubble(data.reply, 'bot', data.sources || [], data.images || []);
+        const replyBubble = addBubble(data.reply, 'bot', data.sources || [], data.images || [], true);
+        await typeFormattedText(replyBubble, data.reply);
       } catch (error) {
         pending.remove();
         addBubble('Não consegui conectar ao Jarvis: ' + (error.message || 'erro desconhecido') + '. Tente novamente em instantes.', 'bot');
