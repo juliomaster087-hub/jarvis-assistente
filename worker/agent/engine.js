@@ -86,7 +86,7 @@ export async function runAgentLoop({ endpoint, apiKey, contents, systemText, mod
 
   if (!finalReply) {
     const finalPayload = {
-      systemInstruction: { parts: [{ text: systemText + "\n\nFinalize a resposta com os resultados das ferramentas. Não solicite novas ferramentas. Se algo falhou, informe claramente." }] },
+      systemInstruction: { parts: [{ text: agentSystemText + "\n\nFinalize a resposta com os resultados das ferramentas. Não solicite novas ferramentas. Se algo falhou, informe claramente." }] },
       contents: workingContents,
       generationConfig: { maxOutputTokens: 900 }
     };
