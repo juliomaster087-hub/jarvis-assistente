@@ -196,7 +196,7 @@ function imageSearchQuery(message) {
   return cleanQuery(message, 180)
     .replace(/^(?:jarvis[, ]*)?(?:por favor[, ]*)?/i, "")
     .replace(/^(?:me )?(?:explique|explica|fale|fale-me|conte|conte-me|descreva|pesquise|pesquisar|pesquisa|busque|buscar|mostre|mostrar)\s+(?:(?:um pouco )?(?:mais )?(?:sobre|a respeito de)\s+)?/i, "")
-    .replace(/^(?:o que (?:é|e)|quem foi|quem é|como funciona|como era|por que|por quê)\s+/i, "")
+    .replace(/^(?:o que (?:é|e|foi|era|são|sao)|quem (?:foi|é)|qual (?:é|foi|era)|quais (?:são|sao|foram|eram)|como funciona|como era|por que|por quê|quando (?:começou|ocorreu|foi)|onde (?:fica|está|esta))\s+/i, "")
     .replace(/[?!.]+$/g, "").trim() || cleanQuery(message, 120);
 }
 function shouldSearchImages(message) {
@@ -204,7 +204,7 @@ function shouldSearchImages(message) {
   if (text.length < 12 || /^(?:oi|olá|ola|bom dia|boa tarde|boa noite|obrigad[oa]|valeu|tchau)\b/i.test(text)) return false;
   if (/^(?:jarvis[, ]*)?(?:lembre(?:-se)?|não esqueça|nao esqueca|guarde|salve na memória|salve na memoria)\b/i.test(text)) return false;
   if (/^(?:quanto é|quanto e|calcule|resolva|derive|integre)\b/i.test(text) && !/\b(sobre|explica|explique)\b/i.test(text)) return false;
-  return /\b(explique|explica|o que (?:é|e)|quem foi|quem é|como funciona|como era|fale sobre|conte sobre|me conte|pesquise|pesquisar|pesquisa sobre|busque|buscar|resumo sobre|hist[oó]ria|biografia|descreva|por que|por quê|mostre imagens?|imagem de|fotografias? de)\b/i.test(text);
+  return /\b(explique|explica|o que (?:é|e|foi|era|são|sao)|quem (?:foi|é)|qual (?:é|foi|era)|quais (?:são|sao|foram|eram)|como funciona|como era|fale sobre|conte sobre|me conte|pesquise|pesquisar|pesquisa sobre|busque|buscar|resumo|resuma|hist[oó]ria|biografia|descreva|por que|por quê|quando (?:começou|ocorreu)|onde (?:fica|está|esta)|causas? (?:da|do|de)|consequências? (?:da|do|de)|diferença entre|compare|mostre imagens?|imagem de|fotografias? de)\b/i.test(text);
 }
 async function searchCommonsImages(query) {
   const params = new URLSearchParams({
