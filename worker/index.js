@@ -188,6 +188,89 @@ function collectResearchSources(research) {
   return sources.slice(0, 10);
 }
 
+
+function stripImageMetadata(value) {
+  return String(value || "").replace(/<[^>]*>/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim();
+}
+function imageSearchQuery(message) {
+  return cleanQuery(message, 180)
+    .replace(/^(?:jarvis[, ]*)?(?:por favor[, ]*)?/i, "")
+    .replace(/^(?:me )?(?:explique|explica|fale|fale-me|conte|conte-me|descreva|pesquise|pesquisar|pesquisa|busque|buscar|mostre|mostrar)\s+(?:(?:um pouco )?(?:mais )?(?:sobre|a respeito de)\s+)?/i, "")
+    .replace(/^(?:o que (?:é|e)|quem foi|quem é|como funciona|como era|por que|por quê)\s+/i, "")
+    .replace(/[?!.]+$/g, "").trim() || cleanQuery(message, 120);
+}
+function shouldSearchImages(message) {
+  const text = cleanQuery(message, 4000);
+  if (text.length < 12 || /^(?:oi|olá|ola|bom dia|boa tarde|boa noite|obrigad[oa]|valeu|tchau)\b/i.test(text)) return false;
+  if (/^(?:jarvis[, ]*)?(?:lembre(?:-se)?|não esqueça|nao esqueca|guarde|salve na memória|salve na memoria)\b/i.test(text)) return false;
+  if (/^(?:quanto é|quanto e|calcule|resolva|derive|integre)\b/i.test(text) && !/\b(sobre|explica|explique)\b/i.test(text)) return false;
+  return /\b(explique|explica|o que (?:é|e)|quem foi|quem é|como funciona|como era|fale sobre|conte sobre|me conte|pesquise|pesquisar|pesquisa sobre|busque|buscar|resumo sobre|hist[oó]ria|biografia|descreva|por que|por quê|mostre imagens?|imagem de|fotografias? de)\b/i.test(text);
+}
+async function searchCommonsImages(query) {
+  const params = new URLSearchParams({
+    action: "query", format: "json", generator: "search", gsrsearch: query,
+    gsrnamespace: "6", gsrlimit: "12", prop: "imageinfo",
+    iiprop: "url|extmetadata", iiurlwidth: "900",
+    iiextmetadatalanguage: "pt-br",
+    iiextmetadatafilter: "Artist|Credit|LicenseShortName|LicenseUrl"
+  });
+  const data = await getJson("https://commons.wikimedia.org/w/api.php?" + params.toString(), {
+    headers: { "User-Agent": "JarvisAssistente/1.0 (educational project; image search)" }
+  });
+  return Object.values(data.query?.pages || {}).map(page => {
+    const info = page.imageinfo?.[0];
+    const metadata = info?.extmetadata || {};
+    const imageUrl = info?.thumburl || info?.url || "";
+    let parsed;
+    try { parsed = new URL(imageUrl); } catch { return null; }
+    const license = stripImageMetadata(metadata.LicenseShortName?.value);
+    if (parsed.protocol !== "https:" || parsed.hostname !== "upload.wikimedia.org" || !license) return null;
+    const title = cleanQuery(String(page.title || "").replace(/^File:/, ""), 180);
+    const author = stripImageMetadata(metadata.Artist?.value || metadata.Credit?.value);
+    const licenseUrl = metadata.LicenseUrl?.value || "";
+    return {
+      title, imageUrl: parsed.href,
+      pageUrl: info.descriptionurl || ("https://commons.wikimedia.org/wiki/" + encodeURIComponent(page.title || "")),
+      source: "Wikimedia Commons", author: cleanQuery(author, 160),
+      license: cleanQuery(license, 80),
+      licenseUrl: /^https:\/\//i.test(licenseUrl) ? licenseUrl : ""
+    };
+  }).filter(Boolean);
+}
+async function searchLibraryOfCongressImages(query) {
+  const params = new URLSearchParams({ q: query, fo: "json", c: "12" });
+  const data = await getJson("https://www.loc.gov/photos/?" + params.toString());
+  return (data.results || []).map(item => {
+    const imageList = Array.isArray(item.image) ? item.image : [item.image];
+    const imageUrl = imageList.find(value => typeof value === "string" && /^https:\/\//i.test(value)) || "";
+    let parsed;
+    try { parsed = new URL(imageUrl); } catch { return null; }
+    const rights = stripImageMetadata([...(Array.isArray(item.rights) ? item.rights : [item.rights]), item.rights_advisory].filter(Boolean).join(" "));
+    if (parsed.protocol !== "https:" || !/(^|\.)loc\.gov$/i.test(parsed.hostname) || !/(public domain|no known restrictions|creative commons|cc0)/i.test(rights)) return null;
+    return {
+      title: cleanQuery(item.title || "Fotografia histórica", 180),
+      imageUrl: parsed.href, pageUrl: item.id || "https://www.loc.gov/",
+      source: "Library of Congress", author: "",
+      license: cleanQuery(rights, 100), licenseUrl: ""
+    };
+  }).filter(Boolean);
+}
+async function findRelevantImages(message) {
+  if (!shouldSearchImages(message)) return [];
+  const query = imageSearchQuery(message);
+  let images = [];
+  try { images = await searchCommonsImages(query); } catch {}
+  if (images.length < 2 && /hist[oó]ria|ditadura|guerra|revolu[cç][aã]o|imp[eé]rio|presidente|civiliza[cç][aã]o|antig[oa]|arqueolog|documento|século|seculo/i.test(message)) {
+    try { images = images.concat(await searchLibraryOfCongressImages(query)); } catch {}
+  }
+  const unique = [];
+  for (const item of images) {
+    if (!unique.some(existing => existing.imageUrl === item.imageUrl)) unique.push(item);
+    if (unique.length === 2) break;
+  }
+  return unique;
+}
+
 async function runManualResearch(message) {
   const text = cleanQuery(message, 4000);
   let match;
@@ -307,6 +390,7 @@ export default {
       const storedMemories = user ? ((await getMemories(env.DB, user.id)).results || []).map(item => item.content) : [];
       const browserMemories = Array.isArray(body.memories) ? body.memories.filter(item => typeof item === "string" && item.trim().length > 0 && item.length <= 300) : [];
       const memories = [...new Set([...storedMemories, ...browserMemories].map(item => String(item).trim()))].slice(0, 30).map(item => "- " + item).join("\n");
+      const imagePromise = findRelevantImages(message).catch(() => []);
       let researchContext = "";
       let researchResult = null;
       try {
@@ -334,7 +418,11 @@ export default {
             env.DB.prepare("INSERT INTO chat_messages (user_id,role,content,created_at) VALUES (?,?,?,?)").bind(user.id, "model", reply, now)
           ]);
         }
-        return json({ reply, remembered: !!(user && rememberMatch), researchType: researchResult ? researchResult.tool : null, sources: collectResearchSources(researchResult) }, 200, cors);
+        const images = await imagePromise;
+        const imageSources = images.map(image => ({ name: image.source + " — " + image.title, url: image.pageUrl }));
+        const sources = [...collectResearchSources(researchResult)];
+        for (const source of imageSources) if (!sources.some(item => item.url === source.url)) sources.push(source);
+        return json({ reply, remembered: !!(user && rememberMatch), researchType: researchResult ? researchResult.tool : null, sources: sources.slice(0, 10), images }, 200, cors);
       } catch { return json({ error: "Falha ao conectar ao provedor de IA." }, 502, cors); }
     }
     return json({ error: "Rota não encontrada." }, 404, cors);
