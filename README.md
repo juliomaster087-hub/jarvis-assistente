@@ -111,12 +111,12 @@ Mantenha os bindings `DB`, `ALLOWED_ORIGIN` e o Secret `GEMINI_API_KEY`. Não co
 
 ### Limites e custo
 
-- O agente não habilita Google Search grounding, Maps, modelos pagos, APIs pagas, filas ou serviços externos novos.
+- O agente não habilita Google Search grounding, Maps, modelos pagos, APIs pagas, filas ou serviços externos novos. A interface do chat também recebeu login/cadastro para que o usuário possa consultar as tarefas salvas no D1.
 - As ferramentas reutilizam os serviços públicos já presentes no projeto.
-- A execução é limitada a 2 rodadas de ferramentas, 4 chamadas de ferramentas e no máximo 3 chamadas ao Gemini por mensagem.
+- A execução é limitada a 2 rodadas de ferramentas, 4 chamadas de ferramentas e no máximo 3 chamadas ao Gemini por mensagem. O Worker limita o chat a 12 mensagens por 15 minutos e 25 por dia por conta (5 por dia sem login), como proteção adicional de quota.
 - A API Gemini e os serviços públicos têm cotas, limites e condições próprias. A camada gratuita do Gemini só permanece sem custo enquanto a conta/projeto e o uso estiverem dentro dos limites gratuitos vigentes. Não habilite faturamento ou upgrade pago se o objetivo for manter custo zero; o código não consegue impedir uma cobrança caso a chave esteja vinculada a um projeto com faturamento habilitado.
 - O plano gratuito do Cloudflare também possui limites de uso. Nenhum sistema hospedado pode prometer disponibilidade ou uso ilimitado sem custo.
-- O registro de tarefas só é criado quando uma ferramenta é efetivamente utilizada por um usuário autenticado.
+- O registro de tarefas só é criado quando uma ferramenta é efetivamente utilizada por um usuário autenticado. O painel de conta no chat permite entrar/criar conta e consultar as tarefas recentes; a sessão fica em sessionStorage e pode ser encerrada pelo botão Sair.
 
 ### Testes locais
 
