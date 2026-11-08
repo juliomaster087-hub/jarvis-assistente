@@ -90,8 +90,8 @@ export async function runAgentLoop({ endpoint, apiKey, contents, systemText, mod
       contents: workingContents,
       generationConfig: { maxOutputTokens: 900 }
     };
-    lastResult = await callGemini(endpoint, apiKey, finalPayload);
-    finalReply = textFromParts(extractParts(lastResult));
+    const finalResult = await callGemini(endpoint, apiKey, finalPayload);
+    finalReply = textFromParts(extractParts(finalResult));
   }
   if (!finalReply) throw new Error("A IA não retornou uma resposta final.");
   return { reply: finalReply, steps, rounds, toolCalls: totalToolCalls };
