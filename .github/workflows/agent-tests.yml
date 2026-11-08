@@ -1,0 +1,20 @@
+name: Jarvis agent tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/jarvis-intelligence-engine]
+
+permissions:
+  contents: read
+
+jobs:
+  agent-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run test:agent
