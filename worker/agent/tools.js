@@ -1,3 +1,5 @@
+import { isToolAllowed } from "./permissions.js";
+
 /**
  * Jarvis Intelligence Engine — allowlisted tools.
  * Gemini can request only these named functions; this module validates every argument.
@@ -47,6 +49,7 @@ function compactResult(value, maxChars = 9000) {
 }
 
 export async function executeAgentTool(name, rawArgs, deps) {
+  if (!isToolAllowed(name, "read")) throw new Error("Ferramenta não autorizada por política de permissões.");
   const args = validateArgs(name, rawArgs);
   let result;
   switch (name) {
