@@ -11,7 +11,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
     :root{color-scheme:dark;--bg:#080d18;--surface:#101a2b;--surface2:#142239;--line:rgba(178,204,231,.13);--text:#f3f7fc;--muted:#9aabc2;--mint:#72e4d0;--blue:#83aaff;--radius:22px;--shadow:0 24px 80px rgba(0,0,0,.28)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}button,input{font:inherit}.quick-config{border:1px solid var(--line);border-radius:999px;background:#142239;color:var(--mint);padding:7px 11px;font-size:.75rem;font-weight:700}.send-btn:disabled{opacity:.6;cursor:wait}.file-btn{display:grid;place-items:center;min-width:44px;border:1px solid var(--line);border-radius:13px;background:#142239;color:var(--mint);font-size:1.5rem;cursor:pointer}.file-btn:hover{border-color:var(--mint)}.file-preview{padding:8px 18px 0;color:var(--mint);font-size:.78rem}.file-preview button{margin-left:9px;border:0;background:transparent;color:#ffb4b4}.file-hint{margin:0;padding:0 18px 10px;color:var(--muted);font-size:.68rem}button{cursor:pointer}.container{width:min(1120px,calc(100% - 40px));margin:auto}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}button,input{font:inherit}.quick-config{border:1px solid var(--line);border-radius:999px;background:#142239;color:var(--mint);padding:7px 11px;font-size:.75rem;font-weight:700}.send-btn:disabled{opacity:.6;cursor:wait}.file-btn{display:grid;place-items:center;min-width:44px;border:1px solid var(--line);border-radius:13px;background:#142239;color:var(--mint);font-size:1.5rem;cursor:pointer}.file-btn:hover{border-color:var(--mint)}.voice-btn{display:grid;place-items:center;min-width:43px;border:1px solid var(--line);border-radius:13px;background:#142239;color:var(--mint);font-size:1.1rem;padding:0 9px}.voice-btn:hover,.voice-btn.active{border-color:var(--mint);background:#1d3a42}.voice-btn:disabled{opacity:.45;cursor:not-allowed}.voice-status{margin:0;padding:0 18px 10px;color:var(--muted);font-size:.68rem}.voice-status.listening{color:var(--mint)}.file-preview{padding:8px 18px 0;color:var(--mint);font-size:.78rem}.file-preview button{margin-left:9px;border:0;background:transparent;color:#ffb4b4}.file-hint{margin:0;padding:0 18px 10px;color:var(--muted);font-size:.68rem}button{cursor:pointer}.container{width:min(1120px,calc(100% - 40px));margin:auto}
     .bg-glow{position:absolute;z-index:-1;pointer-events:none;width:600px;height:600px;border-radius:50%;filter:blur(110px);opacity:.14}.glow-a{top:-300px;left:8%;background:#3bd8c0}.glow-b{top:430px;right:-360px;background:#557ef5}
     .topbar{position:sticky;top:0;z-index:20;background:rgba(8,13,24,.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.25rem;letter-spacing:-.04em}.brand-mark{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#a1ffed,#43b9ac);color:#09201e;box-shadow:0 0 28px #53ddc344}.brand-mark svg{width:21px}.nav-links{display:flex;align-items:center;gap:30px;color:var(--muted);font-size:.92rem}.nav-links a:hover{color:var(--text)}.nav-cta,.primary-btn{border:0;border-radius:999px;background:var(--mint);color:#08201d;font-weight:700;padding:12px 19px;transition:.2s}.nav-cta:hover,.primary-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px #4bd8c333}.menu-toggle{display:none;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:8px 11px}
     .hero{padding:94px 0 88px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:64px;min-height:620px}.pill{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border:1px solid #72e4d044;border-radius:999px;color:var(--mint);font-size:.8rem;font-weight:700;letter-spacing:.04em}.pulse{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 5px #72e4d01a}.hero h1{font:600 clamp(3rem,6vw,5.25rem)/1.04 'Space Grotesk',sans-serif;letter-spacing:-.065em;margin:24px 0 20px}.hero h1 span{background:linear-gradient(100deg,var(--mint),#a7c4ff);background-clip:text;-webkit-background-clip:text;color:transparent}.hero-copy{font-size:1.12rem;color:var(--muted);max-width:500px}.hero-actions{display:flex;align-items:center;gap:22px;margin-top:32px}.text-link{color:#d7e3f2;font-weight:600}.text-link span{color:var(--mint);margin-left:5px}.microcopy{margin-top:18px;color:#71839d;font-size:.82rem}
@@ -53,7 +53,7 @@
       body.chat-mode .memory-panel{max-height:118px;padding:10px 12px}
       body.chat-mode .quick-prompts{padding:8px 10px}
       body.chat-mode .chat-form{padding:10px}
-      body.chat-mode .send-btn{min-width:72px;padding:0 12px}
+      body.chat-mode .send-btn{min-width:72px;padding:0 12px}.voice-btn{min-width:38px;padding:0 7px}.chat-form{gap:6px}
     }
     .chat-images{align-self:flex-start;width:min(88%,620px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:-5px}
     .chat-image-card{min-width:0;margin:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#0d192b}
@@ -119,7 +119,7 @@
             <ul class="memory-list" id="memoryList"></ul>
             <div class="memory-empty" id="memoryEmpty">Nenhuma memória salva. Você também pode escrever “Jarvis, lembre que...” no chat.</div>
           </div>
-          <form class="chat-form" id="chatForm"><label class="file-btn" for="fileInput" title="Anexar PDF, imagem ou TXT" aria-label="Anexar arquivo">＋</label><input id="fileInput" type="file" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp,application/pdf,text/plain,image/png,image/jpeg,image/webp" hidden><input id="chatInput" type="text" maxlength="4000" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off"><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form><div class="file-preview" id="filePreview" hidden></div><p class="file-hint">Arquivos: PDF, imagens e TXT · até 4 MB</p>
+          <form class="chat-form" id="chatForm"><label class="file-btn" for="fileInput" title="Anexar PDF, imagem ou TXT" aria-label="Anexar arquivo">＋</label><input id="fileInput" type="file" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp,application/pdf,text/plain,image/png,image/jpeg,image/webp" hidden><input id="chatInput" type="text" maxlength="4000" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off"><button class="voice-btn" id="micButton" type="button" aria-label="Ditado por voz" title="Falar com o Jarvis">🎙️</button><button class="voice-btn" id="speechToggle" type="button" aria-label="Ativar respostas faladas" aria-pressed="false" title="Ativar respostas faladas">🔇</button><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form><p class="voice-status" id="voiceStatus" aria-live="polite">🎙️ Toque no microfone para ditar; ative 🔊 para ouvir as respostas.</p><div class="file-preview" id="filePreview" hidden></div><p class="file-hint">Arquivos: PDF, imagens e TXT · até 4 MB</p>
         </div>
     </div>
   </main>
@@ -394,6 +394,7 @@
         pending.remove();
         const replyBubble = addBubble(data.reply, 'bot', data.sources || [], data.images || [], true);
         await typeFormattedText(replyBubble, data.reply);
+        if (speechEnabled) speakReply(data.reply);
         if (file) clearSelectedFile();
       } catch (error) {
         pending.remove();
@@ -402,6 +403,86 @@
         sendButton.disabled = false;
         sendButton.textContent = 'Enviar';
       }
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const micButton = $('#micButton');
+    const speechToggle = $('#speechToggle');
+    const voiceStatus = $('#voiceStatus');
+    let recognition = null;
+    let isListening = false;
+    let speechEnabled = localStorage.getItem('jarvis-assistente-voice-output') === 'true';
+    function updateSpeechButton() {
+      speechToggle.textContent = speechEnabled ? '🔊' : '🔇';
+      speechToggle.classList.toggle('active', speechEnabled);
+      speechToggle.setAttribute('aria-pressed', String(speechEnabled));
+      speechToggle.setAttribute('aria-label', speechEnabled ? 'Desativar respostas faladas' : 'Ativar respostas faladas');
+      speechToggle.title = speechEnabled ? 'Desativar respostas faladas' : 'Ativar respostas faladas';
+    }
+    function speakReply(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(String(text).replace(/\\*\\*/g, '').slice(0, 4500));
+      utterance.lang = 'pt-BR';
+      utterance.rate = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const portugueseVoice = voices.find(voice => /^pt-BR$/i.test(voice.lang)) || voices.find(voice => /^pt/i.test(voice.lang));
+      if (portugueseVoice) utterance.voice = portugueseVoice;
+      utterance.onerror = () => { voiceStatus.textContent = 'Não foi possível reproduzir a resposta em voz.'; };
+      window.speechSynthesis.speak(utterance);
+    }
+    speechToggle.addEventListener('click', () => {
+      speechEnabled = !speechEnabled;
+      localStorage.setItem('jarvis-assistente-voice-output', String(speechEnabled));
+      updateSpeechButton();
+      if (!speechEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+      voiceStatus.textContent = speechEnabled ? '🔊 As respostas do Jarvis serão faladas.' : 'Respostas faladas desativadas.';
+    });
+    updateSpeechButton();
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.onstart = () => {
+        isListening = true;
+        micButton.classList.add('active');
+        micButton.textContent = '⏹️';
+        micButton.setAttribute('aria-label', 'Parar ditado');
+        voiceStatus.textContent = '🎙️ Estou ouvindo… fale agora.';
+        voiceStatus.classList.add('listening');
+      };
+      recognition.onresult = event => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) transcript += event.results[i][0].transcript;
+        $('#chatInput').value = transcript;
+      };
+      recognition.onerror = event => {
+        const messages = { 'not-allowed': 'Permita o acesso ao microfone nas configurações do navegador.', 'no-speech': 'Não detectei fala. Tente novamente.', 'network': 'O reconhecimento de voz não está disponível no momento.' };
+        voiceStatus.textContent = messages[event.error] || 'Ocorreu um problema com o microfone.';
+      };
+      recognition.onend = () => {
+        isListening = false;
+        micButton.classList.remove('active');
+        micButton.textContent = '🎙️';
+        micButton.setAttribute('aria-label', 'Ditado por voz');
+        voiceStatus.classList.remove('listening');
+        if (voiceStatus.textContent.includes('Estou ouvindo')) voiceStatus.textContent = 'Ditado concluído. Revise o texto e toque em Enviar.';
+      };
+      micButton.addEventListener('click', () => {
+        if (isListening) recognition.stop();
+        else {
+          try { recognition.start(); }
+          catch { voiceStatus.textContent = 'O microfone já está sendo inicializado. Aguarde um instante.'; }
+        }
+      });
+    } else {
+      micButton.disabled = true;
+      micButton.title = 'Reconhecimento de voz não compatível com este navegador';
+      voiceStatus.textContent = 'Seu navegador não oferece ditado por voz. Tente usar o Chrome atualizado.';
+    }
+    if (!('speechSynthesis' in window)) {
+      speechToggle.disabled = true;
+      speechToggle.title = 'Leitura em voz alta não compatível com este navegador';
     }
     $('#chatForm').addEventListener('submit', event => { event.preventDefault(); sendMessage($('#chatInput').value); });
     document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => sendMessage(button.dataset.prompt)));
