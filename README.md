@@ -6,7 +6,7 @@ Site estático no GitHub Pages + API privada em Cloudflare Workers + Google Gemi
 
 - **Frontend:** GitHub Pages (index.html).
 - **Backend:** Cloudflare Worker em worker/index.js.
-- **IA:** Google Gemini API (modelo gemini-2.5-flash-lite).
+- **IA:** Google Gemini API (modelo configurado atualmente no Worker: `gemini-3.5-flash-lite`).
 - **Segredos:** a chave GEMINI_API_KEY fica no Cloudflare como Secret. Nunca coloque essa chave no HTML, JavaScript público ou GitHub.
 
 ## 1. Criar uma chave Gemini
@@ -68,7 +68,7 @@ Esses serviços são gratuitos sob suas respectivas condições, mas não oferec
 - O backend valida método, rota, tamanho do corpo, quantidade e tamanho das mensagens.
 - **CORS não é autenticação e não impede chamadas diretas por scripts.** Antes de divulgar amplamente o serviço, configure uma regra de rate limiting no Cloudflare (por exemplo, limitar requisições por IP em /api/chat) e monitore o consumo/quota do Gemini. Não compartilhe publicamente o endereço do Worker como se fosse uma chave secreta.
 - O nível gratuito do Gemini tem limites e condições; pode haver indisponibilidade ou cobrança se você mudar para um nível pago. Confira os painéis oficiais antes de usar em produção.
-- O histórico e as memórias são persistidos no D1 por conta e podem ser recuperados em outro dispositivo após o login. As tarefas ainda ficam no armazenamento local do navegador.
+- O histórico, as memórias e o registro das execuções autônomas são persistidos no D1 por conta e podem ser recuperados em outro dispositivo após o login.
 
 ## 5. Testar
 
@@ -77,6 +77,56 @@ Esses serviços são gratuitos sob suas respectivas condições, mas não oferec
 - Erros 429: limite/quota do provedor; aguarde e confira o AI Studio.
 - Erro de origem: confirme que ALLOWED_ORIGIN é exatamente https://juliomaster087-hub.github.io sem barra final.
 - Erro de chave: confirme que GEMINI_API_KEY foi cadastrada como Secret e que o Worker foi publicado novamente.
+
+
+## 6. JARVIS Intelligence Engine
+
+A branch `feature/jarvis-intelligence-engine` adiciona uma camada de orquestração baseada no Function Calling oficial do Gemini, sem substituir o modelo, o Worker, o D1 ou as integrações existentes.
+
+### Recursos incluídos
+
+- **Tool Registry:** catálogo fechado de ferramentas de pesquisa web (GDELT + Wikipédia), notícias, Wikipédia, clima, estabelecimentos, câmbio e imagens (Wikimedia Commons).
+- **Validação:** cada ferramenta valida tipos, tamanhos, códigos de moeda e argumentos antes de chamar integrações.
+- **Agent Loop:** no máximo 2 rodadas de seleção de ferramentas, 4 chamadas por mensagem e uma chamada final de síntese. Não há loop ilimitado nem execução de código gerado pelo modelo.
+- **Segurança:** somente funções explicitamente cadastradas podem ser executadas; resultados externos são tratados como dados não confiáveis; ações externas irreversíveis não estão disponíveis.
+- **Histórico de tarefas:** quando uma ferramenta é usada por uma conta autenticada, o objetivo, as etapas, o estado e um resumo são armazenados no D1.
+- **API de tarefas:** `GET /api/tasks` lista as últimas 30 execuções do usuário autenticado; `GET /api/tasks/:id` recupera uma execução e suas etapas. As rotas exigem sessão.
+- **Compatibilidade:** mensagens, histórico, memória, anexos, fontes e imagens mantêm o contrato existente. A resposta do chat acrescenta o objeto `agent` com contagem de ferramentas, rodadas e identificador do registro.
+
+### Aplicar migração e publicar
+
+Antes de publicar o novo Worker, aplique a migração D1 no banco já configurado:
+
+```bash
+npx wrangler d1 migrations apply jarvis-users --remote --config worker/wrangler.toml
+```
+
+Depois, publique o Worker a partir da raiz do repositório:
+
+```bash
+npx wrangler deploy --config worker/wrangler.toml
+```
+
+Mantenha os bindings `DB`, `ALLOWED_ORIGIN` e o Secret `GEMINI_API_KEY`. Não copie a chave para o repositório, frontend ou logs. O código novo não cria serviços Cloudflare adicionais.
+
+### Limites e custo
+
+- O agente não habilita Google Search grounding, Maps, modelos pagos, APIs pagas, filas ou serviços externos novos. A interface do chat também recebeu login/cadastro para que o usuário possa consultar as tarefas salvas no D1.
+- As ferramentas reutilizam os serviços públicos já presentes no projeto.
+- A execução é limitada a 2 rodadas de ferramentas, 4 chamadas de ferramentas e no máximo 3 chamadas ao Gemini por mensagem. O Worker limita o chat a 12 mensagens por 15 minutos e 25 por dia por conta (5 por dia sem login), como proteção adicional de quota.
+- A API Gemini e os serviços públicos têm cotas, limites e condições próprias. A camada gratuita do Gemini só permanece sem custo enquanto a conta/projeto e o uso estiverem dentro dos limites gratuitos vigentes. Não habilite faturamento ou upgrade pago se o objetivo for manter custo zero; o código não consegue impedir uma cobrança caso a chave esteja vinculada a um projeto com faturamento habilitado.
+- O plano gratuito do Cloudflare também possui limites de uso. Nenhum sistema hospedado pode prometer disponibilidade ou uso ilimitado sem custo.
+- O registro de tarefas só é criado quando uma ferramenta é efetivamente utilizada por um usuário autenticado. O painel de conta no chat permite entrar/criar conta e consultar as tarefas recentes; a sessão fica em sessionStorage e pode ser encerrada pelo botão Sair.
+
+### Testes locais
+
+Com Node.js 20 ou superior:
+
+```bash
+npm run test:agent
+```
+
+O teste de integração da API existente continua disponível em `npm run test:api` com `JARVIS_API_URL` configurada. A execução de testes contra a API real cria contas sintéticas no banco, que devem ser removidas após o teste.
 
 ## GitHub Pages
 
@@ -91,7 +141,7 @@ A versão atual adiciona cadastro e login por e-mail/senha, sessões revogáveis
 - **Autenticação:** senhas derivadas com PBKDF2-HMAC-SHA256 (310.000 iterações); tokens de sessão aleatórios de 256 bits. O banco armazena apenas SHA-256 do token, nunca o token bruto.
 - **Sessões:** validade de 12 horas; o token fica em `sessionStorage` no navegador e é enviado no cabeçalho Authorization. Fechar a aba encerra o armazenamento local do token.
 - **Abuso:** limite básico por IP/identidade em cadastro e login e limite por usuário/IP no chat, usando janelas de 15 minutos.
-- **Privacidade:** cada chamada privada exige sessão válida. O histórico do chat e as memórias ficam no D1 e são filtrados pelo ID autenticado do usuário; contas diferentes não compartilham esses dados. As tarefas continuam locais neste MVP.
+- **Privacidade:** cada chamada privada exige sessão válida. O histórico do chat e as memórias ficam no D1 e são filtrados pelo ID autenticado do usuário; contas diferentes não compartilham esses dados. O histórico de tarefas executadas pelo agente fica no D1 e é isolado por conta.
 - **CORS:** somente a origem exata do GitHub Pages é permitida. CORS não substitui autenticação; todas as rotas privadas validam o token no Worker.
 - **Memória no chat:** o painel do site permite salvar e excluir até 30 lembranças no navegador. A frase “Jarvis, lembre que ...” também adiciona uma lembrança. As lembranças são enviadas como contexto ao Gemini junto das últimas mensagens; no modo de teste sem login, ficam somente naquele navegador/dispositivo. Não salve senhas, dados financeiros ou informações sensíveis.
 - **Histórico:** até 100 mensagens recentes são recuperadas ao entrar na conta, inclusive em outro dispositivo.
@@ -108,4 +158,4 @@ JARVIS_API_URL=https://jarvis-assistente-api.likasousa2024.workers.dev node work
 
 O teste cria um usuário sintético com e-mail `jarvis-smoke-...`; remova esse registro de teste do D1 após a execução, se desejar.
 
-O schema versionado está em `worker/migrations/0001_auth.sql` e `worker/migrations/0002_memory.sql`. A migração 0002 foi aplicada à instância D1 de produção `jarvis-users`. O Worker `jarvis-assistente-api` foi atualizado para persistir histórico e memórias, preservando os bindings `DB`, `ALLOWED_ORIGIN` e o Secret `GEMINI_API_KEY`.
+O schema versionado está em `worker/migrations/0001_auth.sql`, `0002_memory.sql` e `0003_agent.sql`. A migração 0003 cria o histórico de tarefas, execuções e etapas do agente; ela precisa ser aplicada antes de publicar a versão que a utiliza. A versão de produção permanece inalterada até a revisão e publicação desta branch.

@@ -1,0 +1,22 @@
+name: Jarvis agent tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/jarvis-intelligence-engine]
+
+permissions:
+  contents: read
+
+jobs:
+  agent-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run test:agent
+      - name: Validate D1 migration SQL
+        run: python -c "import sqlite3; db=sqlite3.connect(':memory:'); db.execute('CREATE TABLE users (id TEXT PRIMARY KEY)'); db.executescript(open('worker/migrations/0003_agent.sql', encoding='utf-8').read()); print('D1 migration SQL OK')"
