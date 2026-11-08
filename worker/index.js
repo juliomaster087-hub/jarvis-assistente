@@ -90,6 +90,101 @@ async function readBody(request, max = 30000) {
   if (raw.length > max) throw new Error("PAYLOAD_TOO_LARGE");
   return JSON.parse(raw);
 }
+
+function cleanQuery(value, max = 120) {
+  return String(value || "").replace(/[<>]/g, " ").replace(/\\s+/g, " ").trim().slice(0, max);
+}
+async function getJson(url, options = {}) {
+  const response = await fetch(url, { ...options, headers: { "Accept": "application/json", ...(options.headers || {}) } });
+  if (!response.ok) throw new Error("Serviço externo indisponível (" + response.status + ").");
+  return await response.json();
+}
+async function geocodeCity(city) {
+  const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
+  url.search = new URLSearchParams({ name: city, count: "1", language: "pt", format: "json" }).toString();
+  const data = await getJson(url);
+  const place = data.results?.[0];
+  if (!place) throw new Error("Não encontrei essa cidade. Informe o nome e, se possível, o estado ou país.");
+  return { name: [place.name, place.admin1, place.country].filter(Boolean).join(", "), latitude: place.latitude, longitude: place.longitude };
+}
+async function weatherTool(city) {
+  const place = await geocodeCity(city);
+  const url = new URL("https://api.open-meteo.com/v1/forecast");
+  url.search = new URLSearchParams({
+    latitude: String(place.latitude), longitude: String(place.longitude),
+    current: "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m",
+    daily: "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+    forecast_days: "3", timezone: "auto"
+  }).toString();
+  const data = await getJson(url);
+  return { tool: "Clima (Open-Meteo)", place: place.name, current: data.current, daily: data.daily, source: "https://open-meteo.com/" };
+}
+async function newsTool(query) {
+  const url = new URL("https://api.gdeltproject.org/api/v2/doc/doc");
+  url.search = new URLSearchParams({ query, mode: "ArtList", format: "json", maxrecords: "5", sort: "DateDesc" }).toString();
+  const data = await getJson(url);
+  const articles = (data.articles || []).slice(0, 5).map(a => ({
+    title: cleanQuery(a.title, 220), url: a.url, domain: a.domain || "", date: a.seendate || ""
+  })).filter(a => a.title && a.url);
+  return { tool: "Notícias (GDELT)", query, articles, source: "https://www.gdeltproject.org/" };
+}
+async function wikipediaTool(query) {
+  const url = new URL("https://pt.wikipedia.org/w/api.php");
+  url.search = new URLSearchParams({ action: "query", list: "search", srsearch: query, srlimit: "5", format: "json", origin: "*" }).toString();
+  const data = await getJson(url, { headers: { "User-Agent": "JarvisAssistente/1.0 (personal educational project)" } });
+  const results = (data.query?.search || []).slice(0, 5).map(item => ({
+    title: cleanQuery(item.title, 180),
+    snippet: cleanQuery(String(item.snippet || "").replace(/<[^>]*>/g, " "), 450),
+    url: "https://pt.wikipedia.org/wiki/" + encodeURIComponent(String(item.title || "").replace(/ /g, "_"))
+  }));
+  return { tool: "Wikipedia", query, results, source: "https://pt.wikipedia.org/" };
+}
+async function currencyTool(amount, from, to) {
+  const url = new URL("https://api.frankfurter.dev/v2/rates");
+  url.search = new URLSearchParams({ base: from, quotes: to }).toString();
+  const data = await getJson(url);
+  const rate = Array.isArray(data) ? data[0] : null;
+  if (!rate?.rate) throw new Error("Não encontrei essa combinação de moedas.");
+  return { tool: "Câmbio (Frankfurter)", amount, from, to, rate: rate.rate, converted: Number((amount * rate.rate).toFixed(2)), date: rate.date, source: "https://frankfurter.dev/" };
+}
+async function placesTool(query, city) {
+  const place = await geocodeCity(city);
+  const q = cleanQuery(query, 60).toLowerCase();
+  const category = /restaurante|comida|lanchonete|café|cafeteria/.test(q) ? '["amenity"~"restaurant|cafe|fast_food"]' :
+    /mercado|supermercado/.test(q) ? '["shop"="supermarket"]' :
+    /farmácia|farmacia/.test(q) ? '["amenity"="pharmacy"]' :
+    /hotel|hospedagem/.test(q) ? '["tourism"="hotel"]' :
+    /loja|comércio|comercio/.test(q) ? '["shop"]' : '["name"]';
+  const queryText = '[out:json][timeout:20];(node' + category + '(around:3500,' + place.latitude + ',' + place.longitude + ');way' + category + '(around:3500,' + place.latitude + ',' + place.longitude + '););out center tags 12;';
+  const data = await getJson("https://overpass-api.de/api/interpreter", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "data=" + encodeURIComponent(queryText)
+  });
+  const results = (data.elements || []).slice(0, 12).map(item => ({
+    name: cleanQuery(item.tags?.name || item.tags?.brand || "Estabelecimento", 120),
+    type: cleanQuery(item.tags?.amenity || item.tags?.shop || item.tags?.tourism || "", 60),
+    address: [item.tags?.["addr:street"], item.tags?.["addr:housenumber"]].filter(Boolean).join(", "),
+    latitude: item.lat ?? item.center?.lat, longitude: item.lon ?? item.center?.lon
+  }));
+  return { tool: "Estabelecimentos (OpenStreetMap/Overpass)", query, place: place.name, results, source: "https://www.openstreetmap.org/copyright" };
+}
+async function runManualResearch(message) {
+  const text = cleanQuery(message, 4000);
+  let match;
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|consulte|consultar|busque|buscar)\\s+(?:a\\s+)?(?:previs[aã]o do tempo|clima)(?:\\s+(?:em|para|de))?\\s+(.+)$/i))) return await weatherTool(cleanQuery(match[1], 100));
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|consulte|consultar|busque|buscar)\\s+(?:as?\\s+)?not[ií]cias(?:\\s+sobre|\\s+de|\\s+do|\\s+da)?\\s+(.+)$/i))) return await newsTool(cleanQuery(match[1], 100));
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\\s+(?:na\\s+)?wikipedia\\s+(?:sobre\\s+)?(.+)$/i))) return await wikipediaTool(cleanQuery(match[1], 100));
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\\s+(restaurantes|cafeterias|cafés|farm[aá]cias|supermercados|mercados|lojas|hot[eé]is|neg[oó]cios|estabelecimentos)(?:\\s+(?:pr[oó]ximos|perto de mim))?\\s+(?:em|na|no)\\s+(.+)$/i))) return await placesTool(match[1], cleanQuery(match[2], 100));
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:converta|converter)\\s+([0-9]+(?:[.,][0-9]+)?)\\s+([A-Z]{3})\\s+(?:para|em)\\s+([A-Z]{3})$/i))) return await currencyTool(Number(match[1].replace(",", ".")), match[2].toUpperCase(), match[3].toUpperCase());
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\\s+(?:na\\s+)?internet\\s+(?:sobre|por)\\s+(.+)$/i))) {
+    const query = cleanQuery(match[1], 100);
+    const [news, wiki] = await Promise.allSettled([newsTool(query), wikipediaTool(query)]);
+    return { tool: "Pesquisa em fontes abertas", query, news: news.status === "fulfilled" ? news.value.articles : [], encyclopedia: wiki.status === "fulfilled" ? wiki.value.results : [], sources: ["https://www.gdeltproject.org/", "https://pt.wikipedia.org/"] };
+  }
+  return null;
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
