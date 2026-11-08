@@ -154,7 +154,7 @@
     function getApiUrl() { return API_BASE_URL; }
     function renderFormattedText(element, text) {
       element.replaceChildren();
-      const parts = String(text || '').split(/(\\*\\*[^*]+\\*\\*)/g);
+      const parts = String(text || '').split(/(\*\*[^*]+\*\*)/g);
       parts.forEach(part => {
         if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
           const strong = document.createElement('strong');
@@ -167,7 +167,7 @@
     }
     async function typeFormattedText(element, text) {
       element.replaceChildren();
-      const parts = String(text || '').split(/(\\*\\*[^*]+\\*\\*)/g);
+      const parts = String(text || '').split(/(\*\*[^*]+\*\*)/g);
       const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       for (const part of parts) {
         const isBold = part.startsWith('**') && part.endsWith('**') && part.length > 4;
