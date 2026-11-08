@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="Jarvis — um espaço inteligente para organizar ideias, tarefas e seu dia.">
+  <meta property="og:title" content="Jarvis | Seu assistente pessoal">
+  <meta property="og:description" content="Organize seu dia com clareza. Conheça o Jarvis Assistente.">
+  <title>Jarvis — Seu assistente pessoal</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    :root{color-scheme:dark;--bg:#080d18;--surface:#101a2b;--surface2:#142239;--line:rgba(178,204,231,.13);--text:#f3f7fc;--muted:#9aabc2;--mint:#72e4d0;--blue:#83aaff;--radius:22px;--shadow:0 24px 80px rgba(0,0,0,.28)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}button,input{font:inherit}.quick-config{border:1px solid var(--line);border-radius:999px;background:#142239;color:var(--mint);padding:7px 11px;font-size:.75rem;font-weight:700}.send-btn:disabled{opacity:.6;cursor:wait}button{cursor:pointer}.container{width:min(1120px,calc(100% - 40px));margin:auto}
+    .bg-glow{position:absolute;z-index:-1;pointer-events:none;width:600px;height:600px;border-radius:50%;filter:blur(110px);opacity:.14}.glow-a{top:-300px;left:8%;background:#3bd8c0}.glow-b{top:430px;right:-360px;background:#557ef5}
+    .topbar{position:sticky;top:0;z-index:20;background:rgba(8,13,24,.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.25rem;letter-spacing:-.04em}.brand-mark{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#a1ffed,#43b9ac);color:#09201e;box-shadow:0 0 28px #53ddc344}.brand-mark svg{width:21px}.nav-links{display:flex;align-items:center;gap:30px;color:var(--muted);font-size:.92rem}.nav-links a:hover{color:var(--text)}.nav-cta,.primary-btn{border:0;border-radius:999px;background:var(--mint);color:#08201d;font-weight:700;padding:12px 19px;transition:.2s}.nav-cta:hover,.primary-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px #4bd8c333}.menu-toggle{display:none;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:8px 11px}
+    .hero{padding:94px 0 88px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:64px;min-height:620px}.pill{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border:1px solid #72e4d044;border-radius:999px;color:var(--mint);font-size:.8rem;font-weight:700;letter-spacing:.04em}.pulse{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 5px #72e4d01a}.hero h1{font:600 clamp(3rem,6vw,5.25rem)/1.04 'Space Grotesk',sans-serif;letter-spacing:-.065em;margin:24px 0 20px}.hero h1 span{background:linear-gradient(100deg,var(--mint),#a7c4ff);background-clip:text;-webkit-background-clip:text;color:transparent}.hero-copy{font-size:1.12rem;color:var(--muted);max-width:500px}.hero-actions{display:flex;align-items:center;gap:22px;margin-top:32px}.text-link{color:#d7e3f2;font-weight:600}.text-link span{color:var(--mint);margin-left:5px}.microcopy{margin-top:18px;color:#71839d;font-size:.82rem}
+    .hero-visual{position:relative;min-width:0}.orb-wrap{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}.orb{width:230px;height:230px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#c7fff5 0,#73e4d0 22%,#208f91 58%,#132d52 78%);box-shadow:0 0 60px #4bd8c355,0 0 150px #4b80db33;display:grid;place-items:center;animation:float 6s ease-in-out infinite}.orb:before,.orb:after{content:"";position:absolute;border:1px solid #8ef5e54d;border-radius:50%;width:310px;height:310px;transform:rotateX(68deg) rotateZ(-22deg)}.orb:after{width:380px;height:380px;transform:rotateX(68deg) rotateZ(34deg)}.orb svg{width:82px;height:82px;filter:drop-shadow(0 5px 15px #073a3b66)}@keyframes float{50%{transform:translateY(-12px)}}.visual-card{position:relative;z-index:2;width:min(420px,100%);margin:40px auto 0;padding:20px;border:1px solid #b6d5ef24;border-radius:24px;background:linear-gradient(145deg,#14253beF,#0d1728f2);box-shadow:var(--shadow);backdrop-filter:blur(16px)}.visual-head{display:flex;align-items:center;justify-content:space-between;color:#dce8f6;font-size:.85rem;font-weight:700}.live{color:var(--mint);font-size:.72rem}.mini-message{margin-top:18px;padding:13px 15px;border-radius:15px;background:#1a2b43;color:#d8e4f3;font-size:.86rem}.mini-message small{display:block;color:var(--mint);font-weight:700;margin-bottom:5px}.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.mini-stat{background:#0b1525;border:1px solid var(--line);padding:12px;border-radius:14px}.mini-stat strong{display:block;font:600 1.25rem 'Space Grotesk';color:var(--mint)}.mini-stat span{font-size:.72rem;color:var(--muted)}
+    section{padding:82px 0}.section-head{text-align:center;max-width:650px;margin:0 auto 42px}.kicker{color:var(--mint);font-size:.76rem;text-transform:uppercase;letter-spacing:.18em;font-weight:700}.section-head h2{font:600 clamp(2rem,4vw,3.1rem)/1.12 'Space Grotesk';letter-spacing:-.05em;margin:13px 0}.section-head p{color:var(--muted);margin:0}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.feature{padding:25px;border-radius:var(--radius);border:1px solid var(--line);background:linear-gradient(145deg,#111d30,#0c1422);min-height:210px}.feature-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:14px;background:#72e4d018;color:var(--mint);font-size:1.2rem}.feature h3{font:600 1.15rem 'Space Grotesk';margin:20px 0 7px}.feature p{font-size:.92rem;color:var(--muted);margin:0}
+    .demo-section{background:linear-gradient(180deg,transparent,#0d1727 28%,#0d1727 72%,transparent)}.demo-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:38px;align-items:center}.demo-intro h2{font:600 clamp(2rem,4vw,3rem)/1.12 'Space Grotesk';letter-spacing:-.05em;margin:13px 0}.demo-intro p{color:var(--muted)}.demo-note{font-size:.82rem;color:#8092aa;margin-top:18px}.demo-app{border:1px solid #a8c6e324;border-radius:24px;background:#101b2d;box-shadow:var(--shadow);overflow:hidden}.app-bar{display:flex;align-items:center;justify-content:space-between;padding:17px 20px;border-bottom:1px solid var(--line)}.app-title{font-weight:700;display:flex;align-items:center;gap:9px}.app-status{font-size:.75rem;color:var(--mint)}.chat-area{padding:20px;min-height:185px;max-height:255px;overflow:auto;display:flex;flex-direction:column;gap:12px}.chat-bubble{max-width:88%;padding:12px 14px;border-radius:15px;font-size:.88rem}.bot{background:#1a2b43;color:#dce8f5;align-self:flex-start;border-bottom-left-radius:4px}.user{background:#1e655f;color:#f0fffb;align-self:flex-end;border-bottom-right-radius:4px}.quick-prompts{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 15px}.quick-prompts button{border:1px solid #72e4d044;border-radius:999px;padding:7px 11px;background:transparent;color:var(--mint);font-size:.75rem}.quick-prompts button:hover{background:#72e4d014}.chat-form{display:flex;gap:9px;padding:15px 18px;border-top:1px solid var(--line)}.chat-form input{min-width:0;flex:1;border:1px solid var(--line);border-radius:13px;background:#0a1423;color:var(--text);padding:12px 14px;outline:none}.chat-form input:focus{border-color:#72e4d088}.send-btn{border:0;border-radius:13px;background:var(--mint);color:#08201d;padding:0 17px;font-weight:800}
+    .research-sources{align-self:flex-start;max-width:88%;margin-top:-7px;padding:9px 12px;border:1px solid #72e4d033;border-radius:12px;background:#0d192b;color:#9aabc2;font-size:.76rem}.research-sources strong{display:block;color:var(--mint);font-size:.78rem;margin-bottom:4px}.research-sources ul{margin:0;padding-left:17px;display:grid;gap:3px}.research-sources a{color:#a9c5ff;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}.tasks-wrap{display:grid;grid-template-columns:1fr 1fr;gap:35px;align-items:start}.tasks-copy h2{font:600 clamp(2rem,4vw,3rem)/1.12 'Space Grotesk';letter-spacing:-.05em;margin:13px 0}.tasks-copy p{color:var(--muted)}.task-card{padding:23px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:var(--shadow)}.task-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.task-card-head strong{font:600 1.15rem 'Space Grotesk'}.task-count{color:var(--muted);font-size:.78rem}.task-form{display:flex;gap:8px}.task-form input{min-width:0;flex:1;background:#0a1423;border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--text);outline:none}.task-form input:focus{border-color:#72e4d088}.task-form button{border:0;border-radius:12px;background:var(--mint);color:#08201d;font-weight:800;padding:0 16px}.task-list{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:8px}.task-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:#0b1525;border:1px solid var(--line)}.task-item input{accent-color:#72e4d0;width:17px;height:17px}.task-item span{flex:1;overflow-wrap:anywhere;font-size:.88rem}.task-item.done span{text-decoration:line-through;color:#74869e}.delete-task{border:0;background:transparent;color:#8496ad;font-size:1.1rem;padding:2px 5px}.delete-task:hover{color:#ff9d9d}.empty-state{text-align:center;color:#8293aa;padding:20px 0;font-size:.85rem}
+    .closing{padding:35px 0 100px}.closing-card{text-align:center;border:1px solid #72e4d033;border-radius:28px;padding:55px 25px;background:radial-gradient(ellipse at 50% 0,#1c3c4a,#101a2b 65%);}.closing-card h2{font:600 clamp(2rem,4vw,3.2rem)/1.1 'Space Grotesk';letter-spacing:-.05em;margin:12px 0}.closing-card p{color:var(--muted);max-width:520px;margin:0 auto 25px}.footer{border-top:1px solid var(--line);padding:24px 0;color:#7f90a7;font-size:.82rem}.footer-inner{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.footer a:hover{color:var(--mint)}
+
+.auth-panel{padding:18px 20px;border-bottom:1px solid var(--line);background:#0c1728}.auth-panel h3{margin:0 0 5px;font:600 1.1rem 'Space Grotesk'}.auth-panel p{margin:0 0 13px;color:var(--muted);font-size:.82rem}.auth-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px}.auth-fields input{min-width:0;width:100%;background:#0a1423;border:1px solid var(--line);border-radius:11px;padding:11px 12px;color:var(--text)}.auth-actions{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}.auth-actions button{border:0;border-radius:11px;padding:10px 15px;background:var(--mint);color:#08201d;font-weight:800}.auth-actions button.secondary{background:transparent;border:1px solid #72e4d055;color:var(--mint)}.auth-message{font-size:.82rem;color:var(--muted);margin-top:9px;min-height:1.2em}.account-bar{padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);font-size:.82rem;color:var(--muted)}.account-bar button{border:1px solid var(--line);background:transparent;color:var(--mint);border-radius:9px;padding:6px 10px}.memory-panel{padding:14px 18px;border-bottom:1px solid var(--line);background:#0d192b}.memory-panel h4{margin:0 0 8px;font:600 .95rem "Space Grotesk";color:var(--mint)}.memory-form{display:flex;gap:8px}.memory-form input{min-width:0;flex:1;background:#0a1423;border:1px solid var(--line);border-radius:10px;padding:9px 11px;color:var(--text)}.memory-form button,.memory-item button{border:1px solid #72e4d055;border-radius:9px;background:transparent;color:var(--mint);padding:7px 10px}.memory-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}.memory-item{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:9px;background:#101f33;color:#cbd8e8;font-size:.8rem}.memory-item span{overflow-wrap:anywhere}.memory-empty{font-size:.78rem;color:var(--muted)}.auth-hidden{display:none!important}@media(max-width:600px){.auth-fields{grid-template-columns:1fr}}
+    @media(max-width:850px){.hero{grid-template-columns:1fr;gap:28px;padding-top:70px;text-align:center}.hero-copy{margin:auto}.hero-actions{justify-content:center}.hero-visual{min-height:420px}.features{grid-template-columns:1fr 1fr}.demo-grid,.tasks-wrap{grid-template-columns:1fr}.demo-intro,.tasks-copy{text-align:center;max-width:600px;margin:auto}.nav-links{gap:17px}}
+    @media(max-width:600px){.container{width:min(100% - 30px,1120px)}.nav{height:66px}.menu-toggle{display:block}.nav-links{display:none;position:absolute;top:66px;left:0;right:0;padding:18px 22px 22px;background:#0b1424;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch}.nav-links.open{display:flex}.nav-cta{display:none}.hero{padding:58px 0 48px}.hero h1{font-size:clamp(2.7rem,13vw,4rem)}.hero-actions{flex-direction:column;gap:16px}.hero-visual{min-height:355px}.orb{width:175px;height:175px}.orb:before{width:245px;height:245px}.orb:after{width:300px;height:300px}.orb svg{width:65px}.visual-card{margin-top:18px;padding:16px}.features{grid-template-columns:1fr}.feature{min-height:0}section{padding:64px 0}.section-head{margin-bottom:30px}.chat-area{min-height:170px}.closing-card{padding:42px 20px}.footer-inner{justify-content:center;text-align:center}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+    .view-tab{padding:9px 15px;border-radius:999px;border:1px solid transparent;transition:.2s}
+    .view-tab.active{color:var(--mint);background:#72e4d012;border-color:#72e4d044}
+    .chat-bubble{white-space:pre-wrap;overflow-wrap:anywhere}
+    .chat-bubble strong{color:#fff;font-weight:800}
+    body.chat-mode{height:100dvh;overflow:hidden}
+    body.chat-mode main>.hero,body.chat-mode main>#recursos,body.chat-mode main>#tarefas,body.chat-mode main>.closing,body.chat-mode footer{display:none!important}
+    body.chat-mode #demonstracao{display:block;padding:12px 0 14px;height:calc(100dvh - 76px);overflow:hidden;background:transparent}
+    body.chat-mode #demonstracao>.container{width:min(1500px,calc(100% - 32px));height:100%}
+    body.chat-mode .demo-grid{display:block;height:100%}
+    body.chat-mode .demo-intro{display:none}
+    body.chat-mode .demo-app{height:100%;display:flex;flex-direction:column;border-radius:20px}
+    body.chat-mode .chat-area{flex:1;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;padding:22px clamp(16px,4vw,48px)}
+    body.chat-mode .chat-bubble{max-width:min(82%,850px);font-size:.98rem;line-height:1.75}
+    body.chat-mode .chat-images,body.chat-mode .research-sources{margin-left:0}
+    body.chat-mode .quick-prompts{padding:10px 20px;flex-shrink:0}
+    body.chat-mode .memory-panel{max-height:145px;overflow:auto;flex-shrink:0}
+    body.chat-mode .chat-form{flex-shrink:0;padding:14px 18px}
+    body.chat-mode .chat-form input{padding:14px 16px}
+    body.chat-mode .send-btn{min-width:100px}
+    @media(max-width:600px){
+      .view-tab{padding:8px 12px}
+      body.chat-mode #demonstracao{height:calc(100dvh - 66px);padding:7px 0}
+      body.chat-mode #demonstracao>.container{width:calc(100% - 14px)}
+      body.chat-mode .demo-app{border-radius:15px}
+      body.chat-mode .chat-bubble{max-width:94%;font-size:.92rem}
+      body.chat-mode .memory-panel{max-height:118px;padding:10px 12px}
+      body.chat-mode .quick-prompts{padding:8px 10px}
+      body.chat-mode .chat-form{padding:10px}
+      body.chat-mode .send-btn{min-width:72px;padding:0 12px}
+    }
+    .chat-images{align-self:flex-start;width:min(88%,620px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:-5px}
+    .chat-image-card{min-width:0;margin:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#0d192b}
+    .chat-image-card img{display:block;width:100%;height:150px;object-fit:cover;background:#101a2b}
+    .chat-image-card figcaption{display:grid;gap:4px;padding:9px 10px;color:var(--muted);font-size:.7rem;line-height:1.4;overflow-wrap:anywhere}
+    .chat-image-card figcaption strong{color:#dce8f5;font-size:.76rem;font-weight:700}
+    .chat-image-card figcaption a{color:var(--mint);text-decoration:underline}
+    @media(max-width:600px){.chat-images{width:100%;grid-template-columns:1fr}.chat-image-card img{height:190px}}
+
+    .nav{position:relative}
+    .menu-toggle{display:block}
+    .nav-cta{display:none}
+    .nav-links{display:none;position:absolute;top:76px;right:0;min-width:210px;padding:10px;background:#0b1424;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);flex-direction:column;align-items:stretch;gap:4px}
+    .nav-links.open{display:flex}
+    .nav-links a{padding:10px 12px;border-radius:9px}
+    .nav-links a:hover{background:#72e4d014}
+    @media(max-width:600px){.nav-links{top:66px;left:auto;right:0}}
+
+    body{height:100dvh;overflow:hidden}
+    .chat-page{height:calc(100dvh - 76px);padding:12px 0 14px}
+    .chat-page-container{width:min(1500px,calc(100% - 32px));height:100%;margin:0 auto}
+    .demo-app{height:100%;display:flex;flex-direction:column;border-radius:20px}
+    .chat-area{flex:1;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;padding:22px clamp(16px,4vw,48px)}
+    .chat-bubble{max-width:min(82%,850px);font-size:.98rem;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+    .chat-bubble strong{color:#fff;font-weight:800}
+    .chat-images,.research-sources{margin-left:0}
+    .quick-prompts{padding:10px 20px;flex-shrink:0}
+    .memory-panel{max-height:145px;overflow:auto;flex-shrink:0}
+    .chat-form{flex-shrink:0;padding:14px 18px}
+    .chat-form input{padding:14px 16px}
+    .send-btn{min-width:100px}
+    @media(max-width:600px){
+      .chat-page{height:calc(100dvh - 66px);padding:7px 0}
+      .chat-page-container{width:calc(100% - 14px)}
+      .demo-app{border-radius:15px}
+      .chat-bubble{max-width:94%;font-size:.92rem}
+      .memory-panel{max-height:118px;padding:10px 12px}
+      .quick-prompts{padding:8px 10px}
+      .chat-form{padding:10px}
+      .send-btn{min-width:72px;padding:0 12px}
+      .nav-links{top:66px}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="Voltar à apresentação"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.8 14.7 9.3 21.2 12l-6.5 2.7L12 21.2l-2.7-6.5L2.8 12l6.5-2.7L12 2.8Z"/></svg></span>jarvis<span style="color:var(--mint)">.</span></a>
+      <nav class="nav-links" id="navLinks" aria-label="Menu principal"><a href="index.html">Apresentação</a><a href="chat.html" aria-current="page">Chat</a></nav>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    </div>
+  </header>
+  <main class="chat-page">
+    <div class="chat-page-container">
+      <div class="demo-app">
+          <div class="app-bar"><div class="app-title"><span class="brand-mark" style="width:27px;height:27px;border-radius:9px">✦</span> Jarvis Assistente</div><span class="app-status" id="apiStatus">● Conectando</span></div>
+<div class="chat-area" id="chatArea" aria-live="polite"><div class="chat-bubble bot">Olá! 👋 Eu sou o Jarvis. Posso mostrar algumas ideias para organizar seu dia. O que você gostaria de fazer?</div></div>
+          <div class="quick-prompts"><button type="button" data-prompt="Me ajude a organizar meu dia">Organizar meu dia</button><button type="button" data-prompt="Me dê uma ideia para começar">Preciso de uma ideia</button><button type="button" data-prompt="Como posso ser mais produtivo?">Ser mais produtivo</button></div>
+          <div class="memory-panel" aria-label="Memórias do Jarvis">
+            <h4>✦ Memória do Jarvis</h4>
+            <p style="margin:0;color:var(--muted);font-size:.78rem">Salve detalhes que você quer que o Jarvis use em conversas futuras. As memórias ficam neste navegador e podem ser excluídas por você.</p>
+            <form class="memory-form" id="memoryForm"><input id="memoryInput" type="text" maxlength="300" placeholder="Ex.: estou estudando para uma prova..." aria-label="Nova memória" required><button type="submit">Salvar</button></form>
+            <ul class="memory-list" id="memoryList"></ul>
+            <div class="memory-empty" id="memoryEmpty">Nenhuma memória salva. Você também pode escrever “Jarvis, lembre que...” no chat.</div>
+          </div>
+          <form class="chat-form" id="chatForm"><input id="chatInput" type="text" maxlength="4000" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off" required><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form>
+        </div>
+    </div>
+  </main>
+  <script>
+
+    const $ = (selector, root=document) => root.querySelector(selector);
+    const menuToggle = $('#menuToggle'), navLinks = $('#navLinks');
+    menuToggle.addEventListener('click', () => { const open = navLinks.classList.toggle('open'); menuToggle.setAttribute('aria-expanded', String(open)); menuToggle.textContent = open ? '✕' : '☰'; });
+    navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { navLinks.classList.remove('open'); menuToggle.setAttribute('aria-expanded','false'); menuToggle.textContent='☰'; }));
+
+
+    const chatArea = $('#chatArea');
+    const API_BASE_URL = 'https://jarvis-assistente-api.likasousa2024.workers.dev';
+    const HISTORY_KEY = 'jarvis-assistente-chat-history-v3';
+    const MEMORY_KEY = 'jarvis-assistente-memories-v1';
+    let conversation = [];
+    let memories = [];
+    function getApiUrl() { return API_BASE_URL; }
+    function renderFormattedText(element, text) {
+      element.replaceChildren();
+      const parts = String(text || '').split(/(\*\*[^*]+\*\*)/g);
+      parts.forEach(part => {
+        if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+          const strong = document.createElement('strong');
+          strong.textContent = part.slice(2, -2);
+          element.appendChild(strong);
+        } else {
+          element.appendChild(document.createTextNode(part));
+        }
+      });
+    }
+    async function typeFormattedText(element, text) {
+      element.replaceChildren();
+      const parts = String(text || '').split(/(\*\*[^*]+\*\*)/g);
+      const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      for (const part of parts) {
+        const isBold = part.startsWith('**') && part.endsWith('**') && part.length > 4;
+        const content = isBold ? part.slice(2, -2) : part;
+        const node = document.createTextNode('');
+        if (isBold) {
+          const strong = document.createElement('strong');
+          strong.appendChild(node);
+          element.appendChild(strong);
+        } else {
+          element.appendChild(node);
+        }
+        for (const character of content) {
+          node.appendData(character);
+          chatArea.scrollTop = chatArea.scrollHeight;
+          if (!reducedMotion) await new Promise(resolve => setTimeout(resolve, 7));
+        }
+      }
+    }
+    function addBubble(text, kind, sources=[], images=[], animate=false) {
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble ' + kind;
+      if (!animate) renderFormattedText(bubble, text);
+      chatArea.appendChild(bubble);
+      if (kind === 'bot' && Array.isArray(images) && images.length) {
+        const gallery = document.createElement('div');
+        gallery.className = 'chat-images';
+        images.slice(0, 2).forEach(image => {
+          if (!image || typeof image.imageUrl !== 'string' || typeof image.pageUrl !== 'string') return;
+          let parsed;
+          try { parsed = new URL(image.imageUrl); } catch { return; }
+          if (parsed.protocol !== 'https:' || !['upload.wikimedia.org','tile.loc.gov','www.loc.gov','loc.gov'].includes(parsed.hostname)) return;
+          let page;
+          try { page = new URL(image.pageUrl); } catch { return; }
+          if (page.protocol !== 'https:' || !['commons.wikimedia.org','www.loc.gov','loc.gov'].includes(page.hostname)) return;
+          const figure = document.createElement('figure');
+          figure.className = 'chat-image-card';
+          const link = document.createElement('a');
+          link.href = image.pageUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          const img = document.createElement('img');
+          img.src = parsed.href;
+          img.alt = image.title || 'Imagem relacionada à resposta';
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          link.appendChild(img);
+          const caption = document.createElement('figcaption');
+          const title = document.createElement('strong');
+          title.textContent = image.title || 'Imagem relacionada';
+          caption.appendChild(title);
+          const credit = document.createElement('span');
+          credit.textContent = [image.source, image.author ? 'Autor: ' + image.author : '', image.license || 'Licença não informada'].filter(Boolean).join(' · ');
+          caption.appendChild(credit);
+          if (image.licenseUrl && /^https:\/\//i.test(image.licenseUrl)) {
+            const licenseLink = document.createElement('a');
+            licenseLink.href = image.licenseUrl;
+            licenseLink.target = '_blank';
+            licenseLink.rel = 'noopener noreferrer';
+            licenseLink.textContent = 'Ver licença';
+            caption.appendChild(licenseLink);
+          }
+          figure.append(link, caption);
+          gallery.appendChild(figure);
+        });
+        if (gallery.children.length) chatArea.appendChild(gallery);
+      }
+      if (kind === 'bot' && Array.isArray(sources) && sources.length) {
+        const sourceBox = document.createElement('div');
+        sourceBox.className = 'research-sources';
+        const heading = document.createElement('strong');
+        heading.textContent = 'Fontes consultadas';
+        sourceBox.appendChild(heading);
+        const list = document.createElement('ul');
+        sources.slice(0, 10).forEach(source => {
+          if (!source || typeof source.url !== 'string' || !/^https:\/\//i.test(source.url)) return;
+          const item = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = source.url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = source.name || new URL(source.url).hostname;
+          item.appendChild(link);
+          list.appendChild(item);
+        });
+        if (list.children.length) { sourceBox.appendChild(list); chatArea.appendChild(sourceBox); }
+      }
+      chatArea.scrollTop = chatArea.scrollHeight;
+      return bubble;
+    }
+    function saveHistory() {
+      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(conversation.slice(-60))); } catch {}
+    }
+    function saveMemories() {
+      try { localStorage.setItem(MEMORY_KEY, JSON.stringify(memories.slice(0, 30))); } catch {}
+    }
+    function renderMemories() {
+      const list = $('#memoryList');
+      list.replaceChildren();
+      $('#memoryEmpty').hidden = memories.length > 0;
+      memories.forEach((memory, index) => {
+        const item = document.createElement('li');
+        item.className = 'memory-item';
+        const label = document.createElement('span');
+        label.textContent = memory;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.textContent = 'Excluir';
+        remove.setAttribute('aria-label', 'Excluir memória');
+        remove.addEventListener('click', () => {
+          memories.splice(index, 1);
+          saveMemories();
+          renderMemories();
+        });
+        item.append(label, remove);
+        list.appendChild(item);
+      });
+    }
+    function renderHistory() {
+      chatArea.replaceChildren();
+      if (!conversation.length) addBubble('Olá! 👋 Eu sou o Jarvis. Agora posso manter o contexto desta conversa e usar as memórias que você decidir salvar. Como posso ajudar?', 'bot');
+      conversation.forEach(item => addBubble(item.content, item.role === 'user' ? 'user' : 'bot'));
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || localStorage.getItem('jarvis-assistente-chat-history-v2') || '[]');
+      if (Array.isArray(saved)) conversation = saved.filter(item => item && ['user', 'model'].includes(item.role) && typeof item.content === 'string').slice(-60);
+      const savedMemories = JSON.parse(localStorage.getItem(MEMORY_KEY) || '[]');
+      if (Array.isArray(savedMemories)) memories = [...new Set(savedMemories.filter(item => typeof item === 'string' && item.trim()).map(item => item.trim().slice(0, 300)))].slice(0, 30);
+    } catch {}
+    function rememberFromMessage(message) {
+      const match = message.match(/^(?:jarvis[, ]*)?(?:lembre(?:-se)?(?: de)? que|não esqueça que|nao esqueca que)[: ]+(.+)$/i);
+      if (!match) return false;
+      const memory = match[1].trim().slice(0, 300);
+      if (memory && !memories.some(item => item.toLocaleLowerCase() === memory.toLocaleLowerCase()) && memories.length < 30) {
+        memories.unshift(memory);
+        saveMemories();
+        renderMemories();
+      }
+      return true;
+    }
+    $('#memoryForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const input = $('#memoryInput');
+      const value = input.value.trim();
+      if (!value) return;
+      if (!memories.some(item => item.toLocaleLowerCase() === value.toLocaleLowerCase())) {
+        memories.unshift(value.slice(0, 300));
+        memories = memories.slice(0, 30);
+        saveMemories();
+        renderMemories();
+      }
+      input.value = '';
+      input.focus();
+    });
+    $('#apiStatus').textContent = '● Pronto para conversar';
+    async function sendMessage(message) {
+      const clean = message.trim();
+      if (!clean) return;
+      const explicitMemory = rememberFromMessage(clean);
+      addBubble(clean, 'user');
+      $('#chatInput').value = '';
+      const sendButton = $('.send-btn');
+      sendButton.disabled = true;
+      sendButton.textContent = '...';
+      const pending = document.createElement('div');
+      pending.className = 'chat-bubble bot';
+      pending.textContent = 'Pensando…';
+      chatArea.appendChild(pending);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      try {
+        const response = await fetch(getApiUrl() + '/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: clean,
+            messages: [
+              ...(memories.length ? [{ role: 'user', content: 'CONTEXTO DE MEMÓRIA SALVO PELO USUÁRIO (use somente se for relevante; não trate como uma nova pergunta):\\n' + memories.slice(0, 15).join('\\n').slice(0, 2500) }] : []),
+              ...conversation.slice(-10),
+              { role: 'user', content: clean }
+            ].slice(-12),
+            memories: memories.slice(0, 30)
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Não foi possível obter uma resposta (' + response.status + ').');
+        if (typeof data.reply !== 'string' || !data.reply.trim()) throw new Error('O servidor retornou uma resposta vazia.');
+        conversation = [...conversation, { role: 'user', content: clean }, { role: 'model', content: data.reply }].slice(-60);
+        saveHistory();
+        pending.remove();
+        const replyBubble = addBubble(data.reply, 'bot', data.sources || [], data.images || [], true);
+        await typeFormattedText(replyBubble, data.reply);
+      } catch (error) {
+        pending.remove();
+        addBubble('Não consegui conectar ao Jarvis: ' + (error.message || 'erro desconhecido') + '. Tente novamente em instantes.', 'bot');
+      } finally {
+        sendButton.disabled = false;
+        sendButton.textContent = 'Enviar';
+      }
+    }
+    $('#chatForm').addEventListener('submit', event => { event.preventDefault(); sendMessage($('#chatInput').value); });
+    document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => sendMessage(button.dataset.prompt)));
+    renderHistory();
+    renderMemories();
+
+  </script>
+</body>
+</html>
