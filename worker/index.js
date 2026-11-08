@@ -92,7 +92,7 @@ async function readBody(request, max = 30000) {
 }
 
 function cleanQuery(value, max = 120) {
-  return String(value || "").replace(/[<>]/g, " ").replace(/\\s+/g, " ").trim().slice(0, max);
+  return String(value || "").replace(/[<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
 }
 async function getJson(url, options = {}) {
   const response = await fetch(url, { ...options, headers: { "Accept": "application/json", ...(options.headers || {}) } });
@@ -172,12 +172,12 @@ async function placesTool(query, city) {
 async function runManualResearch(message) {
   const text = cleanQuery(message, 4000);
   let match;
-  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|consulte|consultar|busque|buscar)\\s+(?:a\\s+)?(?:previs[aã]o do tempo|clima)(?:\\s+(?:em|para|de))?\\s+(.+)$/i))) return await weatherTool(cleanQuery(match[1], 100));
-  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|consulte|consultar|busque|buscar)\\s+(?:as?\\s+)?not[ií]cias(?:\\s+sobre|\\s+de|\\s+do|\\s+da)?\\s+(.+)$/i))) return await newsTool(cleanQuery(match[1], 100));
-  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\\s+(?:na\\s+)?wikipedia\\s+(?:sobre\\s+)?(.+)$/i))) return await wikipediaTool(cleanQuery(match[1], 100));
-  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\\s+(restaurantes|cafeterias|cafés|farm[aá]cias|supermercados|mercados|lojas|hot[eé]is|neg[oó]cios|estabelecimentos)(?:\\s+(?:pr[oó]ximos|perto de mim))?\\s+(?:em|na|no)\\s+(.+)$/i))) return await placesTool(match[1], cleanQuery(match[2], 100));
-  if ((match = text.match(/^(?:jarvis[, ]*)?(?:converta|converter)\\s+([0-9]+(?:[.,][0-9]+)?)\\s+([A-Z]{3})\\s+(?:para|em)\\s+([A-Z]{3})$/i))) return await currencyTool(Number(match[1].replace(",", ".")), match[2].toUpperCase(), match[3].toUpperCase());
-  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\\s+(?:na\\s+)?internet\\s+(?:sobre|por)\\s+(.+)$/i))) {
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|consulte|consultar|busque|buscar)\s+(?:a\s+)?(?:previs[aã]o do tempo|clima)(?:\s+(?:em|para|de))?\s+(.+)$/i))) return await weatherTool(cleanQuery(match[1], 100));
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|consulte|consultar|busque|buscar)\s+(?:as?\s+)?not[ií]cias(?:\s+sobre|\s+de|\s+do|\s+da)?\s+(.+)$/i))) return await newsTool(cleanQuery(match[1], 100));
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\s+(?:na\s+)?wikipedia\s+(?:sobre\s+)?(.+)$/i))) return await wikipediaTool(cleanQuery(match[1], 100));
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\s+(restaurantes|cafeterias|cafés|farm[aá]cias|supermercados|mercados|lojas|hot[eé]is|neg[oó]cios|estabelecimentos)(?:\s+(?:pr[oó]ximos|perto de mim))?\s+(?:em|na|no)\s+(.+)$/i))) return await placesTool(match[1], cleanQuery(match[2], 100));
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:converta|converter)\s+([0-9]+(?:[.,][0-9]+)?)\s+([A-Z]{3})\s+(?:para|em)\s+([A-Z]{3})$/i))) return await currencyTool(Number(match[1].replace(",", ".")), match[2].toUpperCase(), match[3].toUpperCase());
+  if ((match = text.match(/^(?:jarvis[, ]*)?(?:pesquise|pesquisar|busque|buscar)\s+(?:na\s+)?internet\s+(?:sobre|por)\s+(.+)$/i))) {
     const query = cleanQuery(match[1], 100);
     const [news, wiki] = await Promise.allSettled([newsTool(query), wikipediaTool(query)]);
     return { tool: "Pesquisa em fontes abertas", query, news: news.status === "fulfilled" ? news.value.articles : [], encyclopedia: wiki.status === "fulfilled" ? wiki.value.results : [], sources: ["https://www.gdeltproject.org/", "https://pt.wikipedia.org/"] };
