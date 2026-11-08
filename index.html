@@ -25,6 +25,13 @@
     @media(max-width:850px){.hero{grid-template-columns:1fr;gap:28px;padding-top:70px;text-align:center}.hero-copy{margin:auto}.hero-actions{justify-content:center}.hero-visual{min-height:420px}.features{grid-template-columns:1fr 1fr}.demo-grid,.tasks-wrap{grid-template-columns:1fr}.demo-intro,.tasks-copy{text-align:center;max-width:600px;margin:auto}.nav-links{gap:17px}}
     @media(max-width:600px){.container{width:min(100% - 30px,1120px)}.nav{height:66px}.menu-toggle{display:block}.nav-links{display:none;position:absolute;top:66px;left:0;right:0;padding:18px 22px 22px;background:#0b1424;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch}.nav-links.open{display:flex}.nav-cta{display:none}.hero{padding:58px 0 48px}.hero h1{font-size:clamp(2.7rem,13vw,4rem)}.hero-actions{flex-direction:column;gap:16px}.hero-visual{min-height:355px}.orb{width:175px;height:175px}.orb:before{width:245px;height:245px}.orb:after{width:300px;height:300px}.orb svg{width:65px}.visual-card{margin-top:18px;padding:16px}.features{grid-template-columns:1fr}.feature{min-height:0}section{padding:64px 0}.section-head{margin-bottom:30px}.chat-area{min-height:170px}.closing-card{padding:42px 20px}.footer-inner{justify-content:center;text-align:center}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+    .chat-images{align-self:flex-start;width:min(88%,620px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:-5px}
+    .chat-image-card{min-width:0;margin:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#0d192b}
+    .chat-image-card img{display:block;width:100%;height:150px;object-fit:cover;background:#101a2b}
+    .chat-image-card figcaption{display:grid;gap:4px;padding:9px 10px;color:var(--muted);font-size:.7rem;line-height:1.4;overflow-wrap:anywhere}
+    .chat-image-card figcaption strong{color:#dce8f5;font-size:.76rem;font-weight:700}
+    .chat-image-card figcaption a{color:var(--mint);text-decoration:underline}
+    @media(max-width:600px){.chat-images{width:100%;grid-template-columns:1fr}.chat-image-card img{height:190px}}
   </style>
 </head>
 <body>
@@ -103,11 +110,51 @@
     let conversation = [];
     let memories = [];
     function getApiUrl() { return API_BASE_URL; }
-    function addBubble(text, kind, sources=[]) {
+    function addBubble(text, kind, sources=[], images=[]) {
       const bubble = document.createElement('div');
       bubble.className = 'chat-bubble ' + kind;
       bubble.textContent = text;
       chatArea.appendChild(bubble);
+      if (kind === 'bot' && Array.isArray(images) && images.length) {
+        const gallery = document.createElement('div');
+        gallery.className = 'chat-images';
+        images.slice(0, 2).forEach(image => {
+          if (!image || typeof image.imageUrl !== 'string' || typeof image.pageUrl !== 'string') return;
+          let parsed;
+          try { parsed = new URL(image.imageUrl); } catch { return; }
+          if (parsed.protocol !== 'https:' || !['upload.wikimedia.org','tile.loc.gov','www.loc.gov','loc.gov'].includes(parsed.hostname)) return;
+          const figure = document.createElement('figure');
+          figure.className = 'chat-image-card';
+          const link = document.createElement('a');
+          link.href = image.pageUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          const img = document.createElement('img');
+          img.src = parsed.href;
+          img.alt = image.title || 'Imagem relacionada à resposta';
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          link.appendChild(img);
+          const caption = document.createElement('figcaption');
+          const title = document.createElement('strong');
+          title.textContent = image.title || 'Imagem relacionada';
+          caption.appendChild(title);
+          const credit = document.createElement('span');
+          credit.textContent = [image.source, image.author ? 'Autor: ' + image.author : '', image.license || 'Licença não informada'].filter(Boolean).join(' · ');
+          caption.appendChild(credit);
+          if (image.licenseUrl && /^https:\/\//i.test(image.licenseUrl)) {
+            const licenseLink = document.createElement('a');
+            licenseLink.href = image.licenseUrl;
+            licenseLink.target = '_blank';
+            licenseLink.rel = 'noopener noreferrer';
+            licenseLink.textContent = 'Ver licença';
+            caption.appendChild(licenseLink);
+          }
+          figure.append(link, caption);
+          gallery.appendChild(figure);
+        });
+        if (gallery.children.length) chatArea.appendChild(gallery);
+      }
       if (kind === 'bot' && Array.isArray(sources) && sources.length) {
         const sourceBox = document.createElement('div');
         sourceBox.className = 'research-sources';
@@ -229,7 +276,7 @@
         conversation = [...conversation, { role: 'user', content: clean }, { role: 'model', content: data.reply }].slice(-60);
         saveHistory();
         pending.remove();
-        addBubble(data.reply, 'bot', data.sources || []);
+        addBubble(data.reply, 'bot', data.sources || [], data.images || []);
       } catch (error) {
         pending.remove();
         addBubble('Não consegui conectar ao Jarvis: ' + (error.message || 'erro desconhecido') + '. Tente novamente em instantes.', 'bot');
