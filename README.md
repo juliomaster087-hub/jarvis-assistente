@@ -158,4 +158,4 @@ JARVIS_API_URL=https://jarvis-assistente-api.likasousa2024.workers.dev node work
 
 O teste cria um usuário sintético com e-mail `jarvis-smoke-...`; remova esse registro de teste do D1 após a execução, se desejar.
 
-O schema versionado está em `worker/migrations/0001_auth.sql`, `0002_memory.sql` e `0003_agent.sql`. A migração 0003 cria o histórico de tarefas, execuções e etapas do agente; ela precisa ser aplicada antes de publicar a versão que a utiliza. O Worker `jarvis-assistente-api` foi atualizado para persistir histórico e memórias, preservando os bindings `DB`, `ALLOWED_ORIGIN` e o Secret `GEMINI_API_KEY`.
+O schema versionado está em `worker/migrations/0001_auth.sql`, `0002_memory.sql` e `0003_agent.sql`. A migração 0003 cria o histórico de tarefas, execuções e etapas do agente; ela precisa ser aplicada antes de publicar a versão que a utiliza. A versão de produção permanece inalterada até a revisão e publicação desta branch.
