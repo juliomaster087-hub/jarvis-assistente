@@ -381,6 +381,7 @@
         $('#accountPanel').open = true;
       } catch (error) { $('#accountStatus').textContent = error.message || 'Erro ao autenticar.'; }
     }
+    $('#accountForm').addEventListener('submit', event => event.preventDefault());
     $('#loginButton').addEventListener('click', () => submitAccount('/api/login'));
     $('#registerButton').addEventListener('click', () => submitAccount('/api/register'));
     $('#logoutButton').addEventListener('click', async () => {
