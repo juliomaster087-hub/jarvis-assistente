@@ -39,7 +39,29 @@ O endereço do Worker será parecido com https://jarvis-assistente-api.SUA-CONTA
 
 O endereço do Worker é salvo apenas no armazenamento local desse navegador. Para usar em outro aparelho, repita a configuração nele.
 
-## 4. Segurança e limites
+## 4. Pesquisa manual na web (serviços sem API key)
+
+O Worker inclui ferramentas gratuitas que só são consultadas quando o usuário escreve um comando explícito no chat. Essas integrações não exigem novas chaves, contas ou cartões:
+
+- **Clima:** Open-Meteo + geocodificação Open-Meteo. Gratuito para uso não comercial; limite de 10.000 chamadas/dia e sem garantia de disponibilidade. Exemplo: `pesquise o clima em São Paulo, SP`.
+- **Notícias:** GDELT DOC API. Exemplo: `pesquise notícias sobre tecnologia no Brasil`. O serviço pode impor intervalos/limites e não garante cobertura de toda a imprensa.
+- **Pesquisa em fontes abertas:** GDELT + Wikipedia. Exemplo: `pesquise na internet sobre energia solar`. Isso não é um mecanismo de busca de toda a web.
+- **Wikipedia:** API pública da Wikipédia em português. Exemplo: `pesquise na Wikipedia sobre sistema solar`.
+- **Estabelecimentos:** OpenStreetMap + Overpass. Exemplo: `pesquise restaurantes em Osasco, SP`. Os servidores públicos são compartilhados, podem ficar indisponíveis e devem ser usados com moderação.
+- **Câmbio:** Frankfurter. Exemplo: `converta 10 USD para BRL`. As cotações são diárias, não servem para negociação em tempo real.
+
+As consultas externas são iniciadas apenas por comandos reconhecidos. Não é necessário criar API keys para esses serviços. A chave já existente do Gemini continua sendo necessária para gerar respostas e permanece no Secret `GEMINI_API_KEY` do Cloudflare.
+
+Atribuições e políticas:
+- Open-Meteo: https://open-meteo.com/ (atribuição CC BY 4.0; uso gratuito não comercial).
+- GDELT: https://www.gdeltproject.org/ (incluir atribuição ao projeto).
+- OpenStreetMap: https://www.openstreetmap.org/copyright (dados ODbL; atribuição obrigatória). Overpass público: https://wiki.openstreetmap.org/wiki/Overpass_API.
+- Wikipedia/MediaWiki: https://www.mediawiki.org/wiki/API:REST_API e https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits.
+- Frankfurter: https://frankfurter.dev/ (cotações de referência, atualização diária).
+
+Esses serviços são gratuitos sob suas respectivas condições, mas não oferecem disponibilidade ilimitada. O Jarvis deve informar quando uma fonte estiver indisponível, sem inventar resultados.
+
+## 5. Segurança e limites
 
 - A chave Gemini só existe no backend como Secret; ela nunca é enviada ao navegador.
 - O Worker aceita requisições apenas da origem do GitHub Pages configurada em ALLOWED_ORIGIN.
