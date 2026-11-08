@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:agent": "node --test worker/agent/test-agent.mjs",
+    "test:agent": "node --check worker/index.js && node --test worker/agent/test-agent.mjs",
     "test:api": "node worker/test-api.mjs"
   }
 }
