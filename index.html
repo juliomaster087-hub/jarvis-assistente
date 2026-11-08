@@ -123,6 +123,9 @@
           let parsed;
           try { parsed = new URL(image.imageUrl); } catch { return; }
           if (parsed.protocol !== 'https:' || !['upload.wikimedia.org','tile.loc.gov','www.loc.gov','loc.gov'].includes(parsed.hostname)) return;
+          let page;
+          try { page = new URL(image.pageUrl); } catch { return; }
+          if (page.protocol !== 'https:' || !['commons.wikimedia.org','www.loc.gov','loc.gov'].includes(page.hostname)) return;
           const figure = document.createElement('figure');
           figure.className = 'chat-image-card';
           const link = document.createElement('a');
