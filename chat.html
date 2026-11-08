@@ -11,7 +11,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <style>
     :root{color-scheme:dark;--bg:#080d18;--surface:#101a2b;--surface2:#142239;--line:rgba(178,204,231,.13);--text:#f3f7fc;--muted:#9aabc2;--mint:#72e4d0;--blue:#83aaff;--radius:22px;--shadow:0 24px 80px rgba(0,0,0,.28)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}button,input{font:inherit}.quick-config{border:1px solid var(--line);border-radius:999px;background:#142239;color:var(--mint);padding:7px 11px;font-size:.75rem;font-weight:700}.send-btn:disabled{opacity:.6;cursor:wait}button{cursor:pointer}.container{width:min(1120px,calc(100% - 40px));margin:auto}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}button,input{font:inherit}.quick-config{border:1px solid var(--line);border-radius:999px;background:#142239;color:var(--mint);padding:7px 11px;font-size:.75rem;font-weight:700}.send-btn:disabled{opacity:.6;cursor:wait}.file-btn{display:grid;place-items:center;min-width:44px;border:1px solid var(--line);border-radius:13px;background:#142239;color:var(--mint);font-size:1.5rem;cursor:pointer}.file-btn:hover{border-color:var(--mint)}.file-preview{padding:8px 18px 0;color:var(--mint);font-size:.78rem}.file-preview button{margin-left:9px;border:0;background:transparent;color:#ffb4b4}.file-hint{margin:0;padding:0 18px 10px;color:var(--muted);font-size:.68rem}button{cursor:pointer}.container{width:min(1120px,calc(100% - 40px));margin:auto}
     .bg-glow{position:absolute;z-index:-1;pointer-events:none;width:600px;height:600px;border-radius:50%;filter:blur(110px);opacity:.14}.glow-a{top:-300px;left:8%;background:#3bd8c0}.glow-b{top:430px;right:-360px;background:#557ef5}
     .topbar{position:sticky;top:0;z-index:20;background:rgba(8,13,24,.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.25rem;letter-spacing:-.04em}.brand-mark{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#a1ffed,#43b9ac);color:#09201e;box-shadow:0 0 28px #53ddc344}.brand-mark svg{width:21px}.nav-links{display:flex;align-items:center;gap:30px;color:var(--muted);font-size:.92rem}.nav-links a:hover{color:var(--text)}.nav-cta,.primary-btn{border:0;border-radius:999px;background:var(--mint);color:#08201d;font-weight:700;padding:12px 19px;transition:.2s}.nav-cta:hover,.primary-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px #4bd8c333}.menu-toggle{display:none;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:8px 11px}
     .hero{padding:94px 0 88px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:64px;min-height:620px}.pill{display:inline-flex;align-items:center;gap:9px;padding:7px 12px;border:1px solid #72e4d044;border-radius:999px;color:var(--mint);font-size:.8rem;font-weight:700;letter-spacing:.04em}.pulse{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 5px #72e4d01a}.hero h1{font:600 clamp(3rem,6vw,5.25rem)/1.04 'Space Grotesk',sans-serif;letter-spacing:-.065em;margin:24px 0 20px}.hero h1 span{background:linear-gradient(100deg,var(--mint),#a7c4ff);background-clip:text;-webkit-background-clip:text;color:transparent}.hero-copy{font-size:1.12rem;color:var(--muted);max-width:500px}.hero-actions{display:flex;align-items:center;gap:22px;margin-top:32px}.text-link{color:#d7e3f2;font-weight:600}.text-link span{color:var(--mint);margin-left:5px}.microcopy{margin-top:18px;color:#71839d;font-size:.82rem}
@@ -119,7 +119,7 @@
             <ul class="memory-list" id="memoryList"></ul>
             <div class="memory-empty" id="memoryEmpty">Nenhuma memória salva. Você também pode escrever “Jarvis, lembre que...” no chat.</div>
           </div>
-          <form class="chat-form" id="chatForm"><input id="chatInput" type="text" maxlength="4000" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off" required><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form>
+          <form class="chat-form" id="chatForm"><label class="file-btn" for="fileInput" title="Anexar PDF, imagem ou TXT" aria-label="Anexar arquivo">＋</label><input id="fileInput" type="file" accept=".pdf,.txt,.png,.jpg,.jpeg,.webp,application/pdf,text/plain,image/png,image/jpeg,image/webp" hidden><input id="chatInput" type="text" maxlength="4000" placeholder="Digite uma mensagem..." aria-label="Sua mensagem" autocomplete="off"><button class="send-btn" type="submit" aria-label="Enviar mensagem">Enviar</button></form><div class="file-preview" id="filePreview" hidden></div><p class="file-hint">Arquivos: PDF, imagens e TXT · até 4 MB</p>
         </div>
     </div>
   </main>
@@ -309,30 +309,79 @@
       input.focus();
     });
     $('#apiStatus').textContent = '● Pronto para conversar';
+    let selectedFile = null;
+    const fileInput = $('#fileInput');
+    const filePreview = $('#filePreview');
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      const allowed = ['application/pdf','text/plain','image/png','image/jpeg','image/webp'];
+      if (!allowed.includes(file.type) || file.size > 4 * 1024 * 1024) {
+        addBubble('Arquivo não aceito. Envie PDF, TXT, PNG, JPG ou WEBP com até 4 MB.', 'bot');
+        fileInput.value = '';
+        return;
+      }
+      selectedFile = file;
+      filePreview.hidden = false;
+      filePreview.replaceChildren();
+      const label = document.createElement('span');
+      label.textContent = 'Anexo: ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = 'Remover';
+      remove.addEventListener('click', clearSelectedFile);
+      filePreview.append(label, remove);
+    });
+    function clearSelectedFile() {
+      selectedFile = null;
+      fileInput.value = '';
+      filePreview.hidden = true;
+      filePreview.replaceChildren();
+    }
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+        reader.onerror = () => reject(new Error('Não foi possível ler o arquivo.'));
+        reader.readAsDataURL(file);
+      });
+    }
     async function sendMessage(message) {
       const clean = message.trim();
-      if (!clean) return;
-      const explicitMemory = rememberFromMessage(clean);
-      addBubble(clean, 'user');
+      const file = selectedFile;
+      if (!clean && !file) return;
+      const visibleMessage = file ? (clean || 'Analise este arquivo, por favor.') + '\\n📎 ' + file.name : clean;
+      addBubble(visibleMessage, 'user');
       $('#chatInput').value = '';
       const sendButton = $('.send-btn');
       sendButton.disabled = true;
       sendButton.textContent = '...';
       const pending = document.createElement('div');
       pending.className = 'chat-bubble bot';
-      pending.textContent = 'Pensando…';
+      pending.textContent = 'Analisando…';
       chatArea.appendChild(pending);
       chatArea.scrollTop = chatArea.scrollHeight;
       try {
+        let filePayload = null;
+        if (file) {
+          if (file.type === 'text/plain') {
+            const text = await file.text();
+            if (text.length > 120000) throw new Error('O TXT deve ter no máximo 120 mil caracteres.');
+            filePayload = { name: file.name, mimeType: file.type, text };
+          } else {
+            filePayload = { name: file.name, mimeType: file.type, data: await fileToBase64(file) };
+          }
+        }
         const response = await fetch(getApiUrl() + '/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: clean,
+            message: clean || (file ? 'Analise o arquivo anexado e explique os pontos importantes.' : ''),
+            file: filePayload,
             messages: [
               ...(memories.length ? [{ role: 'user', content: 'CONTEXTO DE MEMÓRIA SALVO PELO USUÁRIO (use somente se for relevante; não trate como uma nova pergunta):\\n' + memories.slice(0, 15).join('\\n').slice(0, 2500) }] : []),
               ...conversation.slice(-10),
-              { role: 'user', content: clean }
+              { role: 'user', content: visibleMessage }
             ].slice(-12),
             memories: memories.slice(0, 30)
           })
@@ -340,14 +389,15 @@
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || 'Não foi possível obter uma resposta (' + response.status + ').');
         if (typeof data.reply !== 'string' || !data.reply.trim()) throw new Error('O servidor retornou uma resposta vazia.');
-        conversation = [...conversation, { role: 'user', content: clean }, { role: 'model', content: data.reply }].slice(-60);
+        conversation = [...conversation, { role: 'user', content: visibleMessage }, { role: 'model', content: data.reply }].slice(-60);
         saveHistory();
         pending.remove();
         const replyBubble = addBubble(data.reply, 'bot', data.sources || [], data.images || [], true);
         await typeFormattedText(replyBubble, data.reply);
+        if (file) clearSelectedFile();
       } catch (error) {
         pending.remove();
-        addBubble('Não consegui conectar ao Jarvis: ' + (error.message || 'erro desconhecido') + '. Tente novamente em instantes.', 'bot');
+        addBubble('Não consegui analisar o arquivo: ' + (error.message || 'erro desconhecido') + '.', 'bot');
       } finally {
         sendButton.disabled = false;
         sendButton.textContent = 'Enviar';
