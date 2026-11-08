@@ -322,7 +322,9 @@ export default {
     if (request.method === "GET" && url.pathname.startsWith("/api/tasks/")) {
       const user = await getUser(request, env);
       if (!user) return json({ error: "Entre na sua conta." }, 401, cors);
-      const taskId = decodeURIComponent(url.pathname.slice("/api/tasks/".length));
+      let taskId = "";
+      try { taskId = decodeURIComponent(url.pathname.slice("/api/tasks/".length)); }
+      catch { return json({ error: "Identificador de tarefa inválido." }, 400, cors); }
       if (!taskId || taskId.length > 80) return json({ error: "Identificador de tarefa inválido." }, 400, cors);
       const task = await getAgentTask(env.DB, user.id, taskId);
       return task ? json({ task }, 200, cors) : json({ error: "Tarefa não encontrada." }, 404, cors);
