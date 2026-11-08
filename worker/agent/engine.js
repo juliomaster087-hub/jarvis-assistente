@@ -1,3 +1,5 @@
+import { buildAgentSystemText } from "./planner.js";
+
 /**
  * Bounded Gemini Function Calling loop.
  * All tool execution stays inside the Worker and is restricted to an allowlist.
@@ -35,19 +37,19 @@ export async function runAgentLoop({ endpoint, apiKey, contents, systemText, mod
   let totalToolCalls = 0;
   let rounds = 0;
   let finalReply = "";
-  let lastResult = null;
   const maxRounds = disableTools ? 0 : 2;
   const maxToolCalls = 4;
+  const agentSystemText = buildAgentSystemText(systemText);
 
   for (let round = 0; round < maxRounds; round++) {
     rounds++;
     const payload = {
-      systemInstruction: { parts: [{ text: systemText }] },
+      systemInstruction: { parts: [{ text: agentSystemText }] },
       contents: workingContents,
-      generationConfig: { maxOutputTokens: 900, temperature: 0.25 },
+      generationConfig: { maxOutputTokens: 900 },
       tools: [{ functionDeclarations: declarations }]
     };
-    lastResult = await callGemini(endpoint, apiKey, payload);
+    const lastResult = await callGemini(endpoint, apiKey, payload);
     const candidate = lastResult?.candidates?.[0]?.content;
     const parts = extractParts(lastResult);
     const calls = parts.filter(part => part?.functionCall && typeof part.functionCall.name === "string");
@@ -86,7 +88,7 @@ export async function runAgentLoop({ endpoint, apiKey, contents, systemText, mod
     const finalPayload = {
       systemInstruction: { parts: [{ text: systemText + "\n\nFinalize a resposta com os resultados das ferramentas. Não solicite novas ferramentas. Se algo falhou, informe claramente." }] },
       contents: workingContents,
-      generationConfig: { maxOutputTokens: 900, temperature: 0.25 }
+      generationConfig: { maxOutputTokens: 900 }
     };
     lastResult = await callGemini(endpoint, apiKey, finalPayload);
     finalReply = textFromParts(extractParts(lastResult));
